@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+src/IATheory/__init__.py
+src/IATheory/wgg_spec_lightcone.py
+src/IATheory/wgp_spec_lightcone.py
+src/IATheory/wrapper_evaluate.py
+src/IATheory.egg-info/PKG-INFO
+src/IATheory.egg-info/SOURCES.txt
+src/IATheory.egg-info/dependency_links.txt
+src/IATheory.egg-info/requires.txt
+src/IATheory.egg-info/top_level.txt

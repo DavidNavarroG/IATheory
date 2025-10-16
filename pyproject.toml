@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "IATheory"                           # The package name on PyPI (must be unique)
+version = "0.0.1"                         # Matches __version__ in __init__.py
+description = "Model correlations from lightcone and boxes for intrinsic alignment analysis."
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+  { name="D. Navarro-Gironés, A. Herle, echoIA, IA Euclid group", email="david.navarro.girones@gmail.com" }
+]
+requires-python = ">=3.8"
+dependencies = ["numpy", "scipy", "pyccl", "astropy", "pandas"]                     
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
