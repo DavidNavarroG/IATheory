@@ -153,6 +153,12 @@ if config_setup['sampler'] != 'evaluate':
         if not np.isfinite(lp):
             return -np.inf, log_likelihood(p)[1]
         return lp + log_likelihood(p)[0], log_likelihood(p)[1]
+
+    def loglikelihood_fn(p_dict):
+        # p_dict keys follow prior_obj keys order
+        p = np.array([p_dict[key] for key in param_names])
+        logl, _ = log_likelihood(p)
+        return logl
     
     path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
     filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
@@ -227,8 +233,61 @@ def run():
                 if converged:
                     break
                 old_tau = tau
+
+    elif config_setup['sampler'] == 'nautilus':
+        
+        from nautilus import Sampler, Prior
+        prior_obj = Prior()  
+
+        if config_setup['IA_model'] == 'NLA':
+            param_names = ['b1', 'b2', 'a1']
+            prior_obj.add_parameter('b1', dist=(0, 3.0))
+            prior_obj.add_parameter('b2', dist=(-5.0, 5.0))
+            prior_obj.add_parameter('a1', dist=(0.0, 10.0))
+        else:
+            param_names = ['b1', 'b2', 'a1', 'a2', 'ad']
+            prior_obj.add_parameter('b1', dist=(0, 5.0))
+            prior_obj.add_parameter('b2', dist=(-5.0, 5.0))
+            prior_obj.add_parameter('a1', dist=(-50.0, 50.0))
+            prior_obj.add_parameter('a2', dist=(-50.0, 50.0))
+            prior_obj.add_parameter('ad', dist=(-50.0, 50.0))
+
+        n_live = 5000
+
+        output_path = '/disks/shear16/herle/models/'
+    
+        filename = output_path + f"nautilus_chain.h5"
+        
+        sampler = Sampler(
+            prior_obj,
+            loglikelihood_fn,
+            n_live=n_live,
+            pool=n_cores if n_cores > 1 else None,
+            filepath=filename,
+            resume=False,
+            n_networks=16,
+        )
+        sampler.run(verbose=True)
+        points, log_w, log_l = sampler.posterior()
+        weights = np.exp(log_w)
+        logz = sampler.log_z
+        output_file = (output_path +
+                    f"nautilus_chain.npz")
+
+        np.savez(output_file,
+                samples=points,
+                logl=log_l,
+                weights=weights,
+                logz=logz)
+        
+        print(f"Saved results to {output_file}")
+
+
+
+
+        
     else:
-        print('Choose between evaluate or emcee')
+        print('Choose between evaluate, emcee or nautilus')
     
     return None
 
