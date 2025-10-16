@@ -40,7 +40,8 @@ def update_config(config_setup):
     
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
-    
+
+    # I define the redshift, the l and the k.
     z = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_z'])
     config_setup['z_centers'] = (z[:-1]+z[1:])/2
     cmd = config_setup['y3fid'].comoving_distance(config_setup['z_centers']).value
@@ -62,15 +63,10 @@ def update_config(config_setup):
     positions_nz = pd.read_parquet(path_nz + 'positions_nz.pq')
     shapes_nz = pd.read_parquet(path_nz + 'shapes_nz.pq')
     
-    #positions_nz = positions_nz[positions_nz.zb.between(config_setup['z_min'], config_setup['z_max'])]
-    #shapes_nz = shapes_nz[shapes_nz.zb.between(config_setup['z_min'], config_setup['z_max'])]
-
-    #positions_nz = positions_nz[positions_nz.zb.between(0, 1.5)]
-    #shapes_nz = shapes_nz[shapes_nz.zb.between(0, 1.5)]
-    
     config_setup['kernel_wgg'] = kernel_wz(positions_nz['zs'], positions_nz['zs'], config_setup)
     config_setup['kernel_wgp'] = kernel_wz(positions_nz['zs'], shapes_nz['zs'], config_setup)
-    
+
+    # I initialize a PyCCL object needed to compute the observables.
     config_setup['ptc_gg'] = pt.PTCalculator(with_NC=True, with_IA=False,
                           log10k_min=config_setup["log10kmin"], log10k_max=config_setup["log10kmax"], nk_per_decade=20)
     
@@ -157,7 +153,6 @@ if config_setup['sampler'] != 'evaluate':
     
     path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
     filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
-
 
 def run():
     
