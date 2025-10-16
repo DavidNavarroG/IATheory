@@ -7,10 +7,12 @@ from astropy.cosmology import FlatLambdaCDM
 import scipy
 import pyccl.nl_pt as pt
 
-from IATheory import wgg_spec_lightcone, wgp_spec_lightcone
+from IATheory import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot
 
 config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_max = 1.1, # Maximum redshift to model
+                    z_snapshot=0, #redshift of the snapshot
+                    num_k = 10001,
                     bins_z = 100, # Number of redsfhit bins
                     rp_model_min = 0.145, # Minimum transverse distance to model in Mpc
                     rp_model_max = 26.09, # Maximum transverse distance to model in Mpc
@@ -20,14 +22,15 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     l_min = 0, # Minimum l
                     l_max = 10001, # Maximum l
                     steps_l = 10, # Steps in l
-                    H0 = 69.,
-                    Om_m = 0.25, # Omega matter
-                    Om_b = 0.044, # Omega baryons
-                    sigma8 = 0.8,
-                    n_s = 0.95,
+                    H0 = 68.1,
+                    Om_m = 0.306, # Omega matter
+                    Om_b = 0.0486, # Omega baryons
+                    sigma8 = 0.815,
+                    n_s = 0.967,
                     IA_model = 'NLA', # Model for IA
                     min_scale_cut = 2, # Minimum scale cut to apply in the correlation function in Mpc/h
                     sampler = 'evaluate', # Allows to choose between evaluate and emcee (for the moment)
+                    box=True, #is it a box or a lightcone
                     )
 
 def update_config(config_setup):
@@ -40,7 +43,7 @@ def update_config(config_setup):
     
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
-
+    config_setup['k_model'] = np.logspace(config_setup['log10kmin'], config_setup['log10kmax'], config_setup['num_k'])
     # I define the redshift, the l and the k.
     z = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_z'])
     config_setup['z_centers'] = (z[:-1]+z[1:])/2
@@ -59,9 +62,9 @@ def update_config(config_setup):
         return kernel
 
     # I read the catalogues from positions and shapes to define the n(z) distribution in the lightcone.
-    path_nz = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/'
-    positions_nz = pd.read_parquet(path_nz + 'positions_nz.pq')
-    shapes_nz = pd.read_parquet(path_nz + 'shapes_nz.pq')
+    path_nz = '/disks/shear16/herle/code/'
+    positions_nz = pd.read_csv(path_nz + 'positions_nz.csv')
+    shapes_nz = pd.read_csv(path_nz + 'shapes_nz.csv')
     
     config_setup['kernel_wgg'] = kernel_wz(positions_nz['zs'], positions_nz['zs'], config_setup)
     config_setup['kernel_wgp'] = kernel_wz(positions_nz['zs'], shapes_nz['zs'], config_setup)
@@ -164,10 +167,20 @@ def run():
         aprox_bias = np.asarray([1.2, -0.4, 0.5, 1, 1.5])
 
     if config_setup['sampler'] == 'evaluate':
-        corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(aprox_bias, config_setup)
-        corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(aprox_bias, config_setup)
-        print(corr_model_wgg)
-        print(corr_model_wgp)
+        if config_setup['box'] == False:
+
+            corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(aprox_bias, config_setup)
+            corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(aprox_bias, config_setup)
+            print(corr_model_wgg)
+            print(corr_model_wgp)
+
+        else:
+            corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
+            corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
+            print(corr_model_wgg)
+            print(corr_model_wgp)
+
+
     elif config_setup['sampler'] == 'emcee':
         import emcee
         from multiprocessing import Pool
