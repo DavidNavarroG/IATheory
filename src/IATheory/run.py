@@ -10,10 +10,13 @@ import scipy
 from scipy.interpolate import splev, splrep
 import pyccl.nl_pt as pt
 
-from IATheory import wgg_spec_lightcone, wgp_spec_lightcone, wgg_phot_lightcone, wgp_phot_lightcone
+
+from IATheory import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
 
 config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_max = 1.1, # Maximum redshift to model
+                    z_snapshot=0, #redshift of the snapshot
+                    num_k = 10001,
                     bins_z = 100, # Number of redsfhit bins
                     rp_model_min = 0.145, # Minimum transverse distance to model in Mpc
                     rp_model_max = 26.09, # Maximum transverse distance to model in Mpc
@@ -23,17 +26,20 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     l_min = 0, # Minimum l
                     l_max = 10001, # Maximum l
                     steps_l = 10, # Steps in l
-                    H0 = 69.,
-                    Om_m = 0.25, # Omega matter
-                    Om_b = 0.044, # Omega baryons
-                    sigma8 = 0.8,
-                    n_s = 0.95,
+                    H0 = 68.1,
+                    Om_m = 0.306, # Omega matter
+                    Om_b = 0.0486, # Omega baryons
+                    sigma8 = 0.815,
+                    n_s = 0.967,
                     IA_model = 'NLA', # Model for IA
                     min_scale_cut = 2, # Minimum scale cut to apply in the correlation function in Mpc/h
+                    max_scale_cut = 100, 
                     z_type = 'spec', # It can either be "phot" or "spec"
                     Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
                     bins_zm = 10, # Number of redshift bins for the error distribution in the phot case
-                    sampler = 'evaluate', # Allows to choose between evaluate and emcee (for the moment)
+                    sampler = 'nautilus', # Allows to choose between evaluate and emcee (for the moment)
+                    box=True, #is it a box or a lightcone
+                    n_cores = 10
                     )
 
 def update_config(config_setup):
@@ -46,7 +52,7 @@ def update_config(config_setup):
     
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
-
+    config_setup['k_model'] = np.logspace(config_setup['log10kmin'], config_setup['log10kmax'], config_setup['num_k'])
     # I define the redshift, the l and the k.
     z = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_z'])
     config_setup['z_centers'] = (z[:-1]+z[1:])/2
@@ -73,20 +79,21 @@ def update_config(config_setup):
         return kernel
 
     # I read the catalogues from positions and shapes to define the n(z) distribution in the lightcone.
-    path_nz = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/'
-    positions_nz = pd.read_csv(path_nz + 'positions_nz.csv')
-    shapes_nz = pd.read_csv(path_nz + 'shapes_nz.csv')
+    if config_setup['box'] == False:
+        path_nz = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/'
+        positions_nz = pd.read_csv(path_nz + 'positions_nz.csv')
+        shapes_nz = pd.read_csv(path_nz + 'shapes_nz.csv')
 
-    if config_setup['z_type'] == 'spec':
-        config_setup['kernel_wgg'] = kernel_wz_spec(positions_nz['zs'], positions_nz['zs'], config_setup)
-        config_setup['kernel_wgp'] = kernel_wz_spec(positions_nz['zs'], shapes_nz['zs'], config_setup)
-        
-    elif config_setup['z_type'] == 'phot':
-        zm = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_zm'])
-        config_setup['zm_centers'] = (zm[:-1]+zm[1:])/2
-        config_setup['cmd_zm'] = config_setup['y3fid'].comoving_distance(config_setup['zm_centers']).value
-        config_setup['kernel_wgg'] = kernel_wz_phot(positions_nz['zb'], positions_nz['zb'], config_setup)
-        config_setup['kernel_wgp'] = kernel_wz_phot(positions_nz['zb'], shapes_nz['zb'], config_setup)
+        if config_setup['z_type'] == 'spec':
+            config_setup['kernel_wgg'] = kernel_wz_spec(positions_nz['zs'], positions_nz['zs'], config_setup)
+            config_setup['kernel_wgp'] = kernel_wz_spec(positions_nz['zs'], shapes_nz['zs'], config_setup)
+            
+        elif config_setup['z_type'] == 'phot':
+            zm = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_zm'])
+            config_setup['zm_centers'] = (zm[:-1]+zm[1:])/2
+            config_setup['cmd_zm'] = config_setup['y3fid'].comoving_distance(config_setup['zm_centers']).value
+            config_setup['kernel_wgg'] = kernel_wz_phot(positions_nz['zb'], positions_nz['zb'], config_setup)
+            config_setup['kernel_wgp'] = kernel_wz_phot(positions_nz['zb'], shapes_nz['zb'], config_setup)
 
     # I initialize a PyCCL object needed to compute the observables.
     config_setup['ptc_gg'] = pt.PTCalculator(with_NC=True, with_IA=False,
@@ -175,7 +182,7 @@ config_setup = update_config(config_setup)
 # If we want to run a likelihood, we need to read some data and then define the priors, likelihood and probability functions
 if config_setup['sampler'] != 'evaluate':
 
-    def read_data():
+    def read_data_mice():
         # I read the data vectors and the covariance matrix.
         path_catalogues = '/nfs/pic.es/user/d/dnavarro/IATheory/data/catalogues/'
         wgg_measured = pd.read_csv(path_catalogues + 'wgg_MICE_zs.txt', sep = ' ')
@@ -197,8 +204,65 @@ if config_setup['sampler'] != 'evaluate':
         corr = pd.concat([corr_wgg, corr_wgp])
     
         return rp_data, corr, cov_mat
+
+    def read_data_flamingo():
+        run = 'L2800N5040'  # or 'L1000N1800'
+
+        wgg_measured = pd.read_hdf(f'/disks/shear16/herle/correlations1/correlations_galaxy_{run}_HYDRO_FIDUCIAL_0.0.h5')[['wgg_rp', 'wgg_xip']]
+        wgp_measured = pd.read_hdf(f'/disks/shear16/herle/correlations1/correlations_galaxy_{run}_HYDRO_FIDUCIAL_0.0.h5')[['wgp_rp', 'wgp_xip']]
+
+        wgg_JK_measured = np.load(f'/disks/shear16/herle/correlations1/wgg_xip_jk_galaxy_{run}_HYDRO_FIDUCIAL_0.0.npy')
+        wgp_JK_measured = np.load(f'/disks/shear16/herle/correlations1/wgp_xip_jk_galaxy_{run}_HYDRO_FIDUCIAL_0.0.npy')
+
+        min_rp_scale_wgg = config_setup['min_scale_cut'] / config_setup['y3fid'].h
+        min_rp_scale_wgp = config_setup['min_scale_cut'] / config_setup['y3fid'].h
+        max_rp_scale_wgg = config_setup['max_scale_cut'] / config_setup['y3fid'].h
+        max_rp_scale_wgp = config_setup['max_scale_cut'] / config_setup['y3fid'].h
+
+        wgg_rp = wgg_measured["wgg_rp"].values / config_setup['y3fid'].h
+        wgp_rp = wgp_measured["wgp_rp"].values / config_setup['y3fid'].h
+
+        mask_wgg = (wgg_rp >= min_rp_scale_wgg) & (wgg_rp <= max_rp_scale_wgg)
+        mask_wgp = (wgp_rp >= min_rp_scale_wgp) & (wgp_rp <= max_rp_scale_wgp)
+
+        wgg_measured = wgg_measured[mask_wgg].reset_index(drop=True)
+        wgp_measured = wgp_measured[mask_wgp].reset_index(drop=True)
+
+        wgg_rp_cut = wgg_rp[mask_wgg]
+        wgp_rp_cut = wgp_rp[mask_wgp]
+
+        wgg_JK_measured = wgg_JK_measured[:, mask_wgg]
+        wgp_JK_measured = wgp_JK_measured[:, mask_wgp]
+
+        wgg_mean = np.mean(wgg_JK_measured, axis=0)
+        wgp_mean = np.mean(wgp_JK_measured, axis=0)
+
+        wgg_diff = pd.DataFrame(wgg_JK_measured - wgg_mean, columns=wgg_rp_cut)
+        wgp_diff = pd.DataFrame(wgp_JK_measured - wgp_mean, columns=wgp_rp_cut)
+
+        NPatches = 125
+        corr_diff = pd.concat([wgg_diff, wgp_diff], axis=1)
+        cov_mat = ((NPatches - 1) / NPatches) * np.sum(np.einsum('ij,ik->ijk', corr_diff, corr_diff), axis=0)
+        cov_mat = pd.DataFrame(data=cov_mat, columns=np.concatenate([wgg_rp_cut, wgp_rp_cut]))
+        cov_mat.set_index(np.concatenate([wgg_rp_cut, wgp_rp_cut]), inplace=True)
+
+
+        # Put back into a DataFrame with the same structure
+        cov_mat = pd.DataFrame(cov_mat, index=cov_mat.index, columns=cov_mat.columns)
+
+        cov_mat = cov_mat / (config_setup['y3fid'].h ** 2)
     
-    rp_data, corr, cov_mat = read_data()
+        wgg_measured["wgg_xip"] /= config_setup['y3fid'].h
+        wgp_measured["wgp_xip"] /= config_setup['y3fid'].h
+
+        corr = pd.concat([wgg_measured.wgg_xip, wgp_measured.wgp_xip]).to_numpy()
+    
+        return wgg_rp_cut, corr, cov_mat
+    
+    if config_setup['box'] == False:
+        rp_data, corr, cov_mat = read_data_mice()
+    else:
+        rp_data, corr, cov_mat = read_data_flamingo()
 
     def log_prior(p):
         
@@ -221,11 +285,23 @@ if config_setup['sampler'] != 'evaluate':
         return np.log(1.0/(np.sqrt(2*np.pi)*sigma))-0.5*(b_2-mu)**2/sigma**2
     
     def log_likelihood(p):
+
+        if config_setup['box'] == False:
+
+            if config_setup['z_type'] == 'spec':
+                corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(p, config_setup)
+                corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(p, config_setup)
+            elif config_setup['z_type'] == 'phot':
+                corr_model_wgg = wgg_phot_lightcone.model_wgg_phot_lightcone(p, config_setup)
+                corr_model_wgp = wgp_phot_lightcone.model_wgp_phot_lightcone(p, config_setup)
+            else:
+                print('ERROR: z_type must be spec or phot')
+        else:
+            corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(p, config_setup)
+            corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(p, config_setup)
+
         
-        corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(p, config_setup)
         corr_model_wgg_interpol = np.interp(rp_data, config_setup['rp_model'], corr_model_wgg)
-        
-        corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(p, config_setup)
         corr_model_wgp_interpol = np.interp(rp_data, config_setup['rp_model'], corr_model_wgp)
 
         corr_model_interpol = np.concatenate([corr_model_wgg_interpol, corr_model_wgp_interpol])
@@ -238,6 +314,8 @@ if config_setup['sampler'] != 'evaluate':
             return -np.inf, chisq
         return ll, chisq
     
+    
+    
     def log_probability(p):
         
         lp = log_prior(p)
@@ -245,6 +323,17 @@ if config_setup['sampler'] != 'evaluate':
         if not np.isfinite(lp):
             return -np.inf, log_likelihood(p)[1]
         return lp + log_likelihood(p)[0], log_likelihood(p)[1]
+
+    def loglikelihood_fn(p_dict):
+        # p_dict keys follow prior_obj keys order
+        if config_setup['IA_model'] == 'NLA':
+            param_names = ['b1', 'b2', 'a1']
+        else:
+            param_names = ['b1', 'b2', 'a1', 'a2', 'ad']
+
+        p = np.array([p_dict[key] for key in param_names])
+        logl, _ = log_likelihood(p)
+        return logl
     
     path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
     filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
@@ -259,16 +348,25 @@ def run():
         aprox_bias = np.asarray([1.2, -0.4, 0.5, 1, 1.5])
 
     if config_setup['sampler'] == 'evaluate':
-        if config_setup['z_type'] == 'spec':
-            corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(aprox_bias, config_setup)
-            corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(aprox_bias, config_setup)
-        elif config_setup['z_type'] == 'phot':
-            corr_model_wgg = wgg_phot_lightcone.model_wgg_phot_lightcone(aprox_bias, config_setup)
-            corr_model_wgp = wgp_phot_lightcone.model_wgp_phot_lightcone(aprox_bias, config_setup)
+        if config_setup['box'] == False:
+
+            if config_setup['z_type'] == 'spec':
+                corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(aprox_bias, config_setup)
+                corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(aprox_bias, config_setup)
+            elif config_setup['z_type'] == 'phot':
+                corr_model_wgg = wgg_phot_lightcone.model_wgg_phot_lightcone(aprox_bias, config_setup)
+                corr_model_wgp = wgp_phot_lightcone.model_wgp_phot_lightcone(aprox_bias, config_setup)
+            else:
+                print('ERROR: z_type must be spec or phot')
         else:
-            print('ERROR: z_type must be spec or phot')
+            corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
+            corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
+
+        
         print(corr_model_wgg)
         print(corr_model_wgp)
+
+
     elif config_setup['sampler'] == 'emcee':
         import emcee
         from multiprocessing import Pool
@@ -315,8 +413,62 @@ def run():
                 if converged:
                     break
                 old_tau = tau
+
+    elif config_setup['sampler'] == 'nautilus':
+
+        from nautilus import Sampler, Prior
+
+        prior_obj = Prior()  
+
+        if config_setup['IA_model'] == 'NLA':
+            
+            prior_obj.add_parameter('b1', dist=(0, 3.0))
+            prior_obj.add_parameter('b2', dist=(-5.0, 5.0))
+            prior_obj.add_parameter('a1', dist=(0.0, 10.0))
+        else:
+            
+            prior_obj.add_parameter('b1', dist=(0, 5.0))
+            prior_obj.add_parameter('b2', dist=(-5.0, 5.0))
+            prior_obj.add_parameter('a1', dist=(-50.0, 50.0))
+            prior_obj.add_parameter('a2', dist=(-50.0, 50.0))
+            prior_obj.add_parameter('ad', dist=(-50.0, 50.0))
+
+        n_live = 5000
+
+        output_path = '/disks/shear16/herle/models/'
+    
+        filename = output_path + f"nautilus_chain.h5"
+        
+        sampler = Sampler(
+            prior_obj,
+            loglikelihood_fn,
+            n_live=n_live,
+            pool= config_setup['n_cores'] if config_setup['n_cores'] > 1 else None,
+            filepath=filename,
+            resume=False,
+            n_networks=16,
+        )
+        sampler.run(verbose=True)
+        points, log_w, log_l = sampler.posterior()
+        weights = np.exp(log_w)
+        logz = sampler.log_z
+        output_file = (output_path +
+                    f"nautilus_chain.npz")
+
+        np.savez(output_file,
+                samples=points,
+                logl=log_l,
+                weights=weights,
+                logz=logz)
+        
+        print(f"Saved results to {output_file}")
+
+
+
+
+        
     else:
-        print('Choose between evaluate or emcee')
+        print('Choose between evaluate, emcee or nautilus')
     
     return None
 
