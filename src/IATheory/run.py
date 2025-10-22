@@ -11,7 +11,7 @@ from scipy.interpolate import splev, splrep
 import pyccl.nl_pt as pt
 
 
-from IATheory import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
+from compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
 
 config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_max = 1.1, # Maximum redshift to model
@@ -26,19 +26,24 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     l_min = 0, # Minimum l
                     l_max = 10001, # Maximum l
                     steps_l = 10, # Steps in l
-                    H0 = 68.1,
-                    Om_m = 0.306, # Omega matter
-                    Om_b = 0.0486, # Omega baryons
-                    sigma8 = 0.815,
-                    n_s = 0.967,
+                    H0 = 69.,
+                    Om_m = 0.25, # Omega matter
+                    Om_b = 0.044, # Omega baryons
+                    sigma8 = 0.8,
+                    n_s = 0.95,
+                    #H0 = 68.1,
+                    #Om_m = 0.306, # Omega matter
+                    #Om_b = 0.0486, # Omega baryons
+                    #sigma8 = 0.815,
+                    #n_s = 0.967,
                     IA_model = 'NLA', # Model for IA
                     min_scale_cut = 2, # Minimum scale cut to apply in the correlation function in Mpc/h
                     max_scale_cut = 100, 
                     z_type = 'spec', # It can either be "phot" or "spec"
                     Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
                     bins_zm = 10, # Number of redshift bins for the error distribution in the phot case
-                    sampler = 'nautilus', # Allows to choose between evaluate and emcee (for the moment)
-                    box=True, #is it a box or a lightcone
+                    sampler = 'emcee', # Allows to choose between evaluate and emcee (for the moment)
+                    box=False, #is it a box or a lightcone
                     n_cores = 10
                     )
 
@@ -182,87 +187,14 @@ config_setup = update_config(config_setup)
 # If we want to run a likelihood, we need to read some data and then define the priors, likelihood and probability functions
 if config_setup['sampler'] != 'evaluate':
 
-    def read_data_mice():
-        # I read the data vectors and the covariance matrix.
-        path_catalogues = '/nfs/pic.es/user/d/dnavarro/IATheory/data/catalogues/'
-        wgg_measured = pd.read_csv(path_catalogues + 'wgg_MICE_zs.txt', sep = ' ')
-        wgp_measured = pd.read_csv(path_catalogues + 'wgp_MICE_zs.txt', sep = ' ')
-        cov_mat = pd.read_csv(path_catalogues + 'cov_std_MICE_zs.txt', sep = ' ', header = None)
-        cov_mat.columns = np.concatenate([wgg_measured.r.values, wgg_measured.r.values])
-        cov_mat.set_index(np.concatenate([wgg_measured.r.values, wgg_measured.r.values]), inplace = True)
-        
-        # I apply the scale cuts
-        min_rp_scale = config_setup['min_scale_cut']/0.69
-        wgg_measured = wgg_measured[wgg_measured.r > min_rp_scale]
-        wgp_measured = wgp_measured[wgp_measured.r > min_rp_scale]
-        cov_mat = cov_mat.loc[(cov_mat.columns>min_rp_scale), (cov_mat.columns>min_rp_scale)].values
-        
-        # I save the transverse distance and the correlation functions
-        rp_data = wgg_measured.r
-        corr_wgg = wgg_measured.wgg
-        corr_wgp = wgp_measured.wgp
-        corr = pd.concat([corr_wgg, corr_wgp])
-    
-        return rp_data, corr, cov_mat
-
-    def read_data_flamingo():
-        run = 'L2800N5040'  # or 'L1000N1800'
-
-        wgg_measured = pd.read_hdf(f'/disks/shear16/herle/correlations1/correlations_galaxy_{run}_HYDRO_FIDUCIAL_0.0.h5')[['wgg_rp', 'wgg_xip']]
-        wgp_measured = pd.read_hdf(f'/disks/shear16/herle/correlations1/correlations_galaxy_{run}_HYDRO_FIDUCIAL_0.0.h5')[['wgp_rp', 'wgp_xip']]
-
-        wgg_JK_measured = np.load(f'/disks/shear16/herle/correlations1/wgg_xip_jk_galaxy_{run}_HYDRO_FIDUCIAL_0.0.npy')
-        wgp_JK_measured = np.load(f'/disks/shear16/herle/correlations1/wgp_xip_jk_galaxy_{run}_HYDRO_FIDUCIAL_0.0.npy')
-
-        min_rp_scale_wgg = config_setup['min_scale_cut'] / config_setup['y3fid'].h
-        min_rp_scale_wgp = config_setup['min_scale_cut'] / config_setup['y3fid'].h
-        max_rp_scale_wgg = config_setup['max_scale_cut'] / config_setup['y3fid'].h
-        max_rp_scale_wgp = config_setup['max_scale_cut'] / config_setup['y3fid'].h
-
-        wgg_rp = wgg_measured["wgg_rp"].values / config_setup['y3fid'].h
-        wgp_rp = wgp_measured["wgp_rp"].values / config_setup['y3fid'].h
-
-        mask_wgg = (wgg_rp >= min_rp_scale_wgg) & (wgg_rp <= max_rp_scale_wgg)
-        mask_wgp = (wgp_rp >= min_rp_scale_wgp) & (wgp_rp <= max_rp_scale_wgp)
-
-        wgg_measured = wgg_measured[mask_wgg].reset_index(drop=True)
-        wgp_measured = wgp_measured[mask_wgp].reset_index(drop=True)
-
-        wgg_rp_cut = wgg_rp[mask_wgg]
-        wgp_rp_cut = wgp_rp[mask_wgp]
-
-        wgg_JK_measured = wgg_JK_measured[:, mask_wgg]
-        wgp_JK_measured = wgp_JK_measured[:, mask_wgp]
-
-        wgg_mean = np.mean(wgg_JK_measured, axis=0)
-        wgp_mean = np.mean(wgp_JK_measured, axis=0)
-
-        wgg_diff = pd.DataFrame(wgg_JK_measured - wgg_mean, columns=wgg_rp_cut)
-        wgp_diff = pd.DataFrame(wgp_JK_measured - wgp_mean, columns=wgp_rp_cut)
-
-        NPatches = 125
-        corr_diff = pd.concat([wgg_diff, wgp_diff], axis=1)
-        cov_mat = ((NPatches - 1) / NPatches) * np.sum(np.einsum('ij,ik->ijk', corr_diff, corr_diff), axis=0)
-        cov_mat = pd.DataFrame(data=cov_mat, columns=np.concatenate([wgg_rp_cut, wgp_rp_cut]))
-        cov_mat.set_index(np.concatenate([wgg_rp_cut, wgp_rp_cut]), inplace=True)
-
-
-        # Put back into a DataFrame with the same structure
-        cov_mat = pd.DataFrame(cov_mat, index=cov_mat.index, columns=cov_mat.columns)
-
-        cov_mat = cov_mat / (config_setup['y3fid'].h ** 2)
-    
-        wgg_measured["wgg_xip"] /= config_setup['y3fid'].h
-        wgp_measured["wgp_xip"] /= config_setup['y3fid'].h
-
-        corr = pd.concat([wgg_measured.wgg_xip, wgp_measured.wgp_xip]).to_numpy()
-    
-        return wgg_rp_cut, corr, cov_mat
+    from read_data import read_data_mice, read_data_flamingo
     
     if config_setup['box'] == False:
-        rp_data, corr, cov_mat = read_data_mice()
+        rp_data, corr, cov_mat = read_data_mice.read_data_mice(config_setup)
     else:
-        rp_data, corr, cov_mat = read_data_flamingo()
+        rp_data, corr, cov_mat = read_data_flamingo.read_data_flamingo(config_setup)
+
+    print(rp_data, corr, cov_mat)
 
     def log_prior(p):
         
@@ -334,9 +266,6 @@ if config_setup['sampler'] != 'evaluate':
         p = np.array([p_dict[key] for key in param_names])
         logl, _ = log_likelihood(p)
         return logl
-    
-    path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
-    filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
 
 def run():
     
@@ -370,6 +299,9 @@ def run():
     elif config_setup['sampler'] == 'emcee':
         import emcee
         from multiprocessing import Pool
+
+        path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
+        filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h_emcee.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
         
         n_walkers = 12 #32
         n_steps = 100 #10000
