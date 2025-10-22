@@ -10,8 +10,8 @@ import scipy
 from scipy.interpolate import splev, splrep
 import pyccl.nl_pt as pt
 
-
 from compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
+from likelihood import read_config, run_sampler
 
 config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_max = 1.1, # Maximum redshift to model
@@ -42,7 +42,7 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_type = 'spec', # It can either be "phot" or "spec"
                     Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
                     bins_zm = 10, # Number of redshift bins for the error distribution in the phot case
-                    sampler = 'emcee', # Allows to choose between evaluate and emcee (for the moment)
+                    sampler = 'nautilus', # Allows to choose between evaluate and emcee (for the moment)
                     box=False, #is it a box or a lightcone
                     n_cores = 10
                     )
@@ -184,91 +184,8 @@ def update_config(config_setup):
 
 config_setup = update_config(config_setup)
 
-# If we want to run a likelihood, we need to read some data and then define the priors, likelihood and probability functions
-if config_setup['sampler'] != 'evaluate':
-
-    from read_data import read_data_mice, read_data_flamingo
-    
-    if config_setup['box'] == False:
-        rp_data, corr, cov_mat = read_data_mice.read_data_mice(config_setup)
-    else:
-        rp_data, corr, cov_mat = read_data_flamingo.read_data_flamingo(config_setup)
-
-    print(rp_data, corr, cov_mat)
-
-    def log_prior(p):
-        
-        b_1 = p[0]
-        b_2 = p[1]
-        if config_setup['IA_model'] == 'NLA':
-            a_1 = p[2]
-            if not ((0 < b_1 < 2) & (-8 < a_1 < 8)):
-                return -np.inf
-        
-        elif config_setup['IA_model'] == 'TATT':
-            a_1 = p[2]
-            a_2 = p[3]
-            a_d = p[4]
-            if not ((0 < b_1 < 2) & (-8 < a_1 < 8) & (-12 < a_2 < 12) & (-12 < a_d < 12)):
-                return -np.inf
-        
-        mu = 0
-        sigma = 0.5
-        return np.log(1.0/(np.sqrt(2*np.pi)*sigma))-0.5*(b_2-mu)**2/sigma**2
-    
-    def log_likelihood(p):
-
-        if config_setup['box'] == False:
-
-            if config_setup['z_type'] == 'spec':
-                corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(p, config_setup)
-                corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(p, config_setup)
-            elif config_setup['z_type'] == 'phot':
-                corr_model_wgg = wgg_phot_lightcone.model_wgg_phot_lightcone(p, config_setup)
-                corr_model_wgp = wgp_phot_lightcone.model_wgp_phot_lightcone(p, config_setup)
-            else:
-                print('ERROR: z_type must be spec or phot')
-        else:
-            corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(p, config_setup)
-            corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(p, config_setup)
-
-        
-        corr_model_wgg_interpol = np.interp(rp_data, config_setup['rp_model'], corr_model_wgg)
-        corr_model_wgp_interpol = np.interp(rp_data, config_setup['rp_model'], corr_model_wgp)
-
-        corr_model_interpol = np.concatenate([corr_model_wgg_interpol, corr_model_wgp_interpol])
-    
-        delta = (corr - corr_model_interpol)
-        inv_cov = np.linalg.pinv(cov_mat)
-        chisq = delta.dot(inv_cov.dot(delta.T))
-        ll = -0.5 * chisq
-        if np.isnan(ll):
-            return -np.inf, chisq
-        return ll, chisq
-    
-    
-    
-    def log_probability(p):
-        
-        lp = log_prior(p)
-    
-        if not np.isfinite(lp):
-            return -np.inf, log_likelihood(p)[1]
-        return lp + log_likelihood(p)[0], log_likelihood(p)[1]
-
-    def loglikelihood_fn(p_dict):
-        # p_dict keys follow prior_obj keys order
-        if config_setup['IA_model'] == 'NLA':
-            param_names = ['b1', 'b2', 'a1']
-        else:
-            param_names = ['b1', 'b2', 'a1', 'a2', 'ad']
-
-        p = np.array([p_dict[key] for key in param_names])
-        logl, _ = log_likelihood(p)
-        return logl
-
 def run():
-    
+
     if config_setup['IA_model'] == 'NLA':
         n_dim = 3
         aprox_bias = np.asarray([1.2, -0.4, 0.5])
@@ -278,7 +195,6 @@ def run():
 
     if config_setup['sampler'] == 'evaluate':
         if config_setup['box'] == False:
-
             if config_setup['z_type'] == 'spec':
                 corr_model_wgg = wgg_spec_lightcone.model_wgg_spec_lightcone(aprox_bias, config_setup)
                 corr_model_wgp = wgp_spec_lightcone.model_wgp_spec_lightcone(aprox_bias, config_setup)
@@ -290,115 +206,19 @@ def run():
         else:
             corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
             corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
-
         
         print(corr_model_wgg)
         print(corr_model_wgp)
-
-
-    elif config_setup['sampler'] == 'emcee':
-        import emcee
-        from multiprocessing import Pool
-
-        path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
-        filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h_emcee.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
-        
-        n_walkers = 12 #32
-        n_steps = 100 #10000
-        initial = aprox_bias + 0.1 * np.random.randn(n_walkers, n_dim)
-        backend = emcee.backends.HDFBackend(filename)
-        backend.reset(n_walkers, n_dim)
-        
-        # We'll track how the average autocorrelation time estimate changes
-        index = 0
-        autocorr = np.empty(n_steps)
-    
-        # This will be useful to testing convergence
-        old_tau = np.inf
-        
-        # I run the chains
-        with Pool() as pool:
-            sampler = emcee.EnsembleSampler(
-            n_walkers,
-            n_dim,
-            log_probability,
-            moves=[(emcee.moves.DEMove(), 0.8), (emcee.moves.DESnookerMove(), 0.2)],
-            pool=pool,
-            backend=backend
-            )
-            # Now we'll sample for up to n_steps
-            for sample in sampler.sample(initial, iterations=n_steps, progress=True):
-                # Only check convergence every 100 steps
-                if sampler.iteration % 100:
-                    continue
-    
-                # Compute the autocorrelation time so far
-                # Using tol=0 means that we'll always get an estimate even
-                # if it isn't trustworthy
-                tau = sampler.get_autocorr_time(tol=0)
-                autocorr[index] = np.mean(tau)
-                index += 1
-    
-                # Check convergence
-                converged = np.all(tau * 100 < sampler.iteration)
-                converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
-                if converged:
-                    break
-                old_tau = tau
-
-    elif config_setup['sampler'] == 'nautilus':
-
-        from nautilus import Sampler, Prior
-
-        prior_obj = Prior()  
-
-        if config_setup['IA_model'] == 'NLA':
-            
-            prior_obj.add_parameter('b1', dist=(0, 3.0))
-            prior_obj.add_parameter('b2', dist=(-5.0, 5.0))
-            prior_obj.add_parameter('a1', dist=(0.0, 10.0))
+    elif config_setup['sampler'] != 'evaluate':
+        read_config.init_config(config_setup) # This function is used to pass the config information to the run_sampler.py as a global variable
+        run_sampler.init_config()
+        run_sampler.initialize_data()
+        if config_setup['sampler'] == 'emcee':
+            run_sampler.run_emcee()
+        elif config_setup['sampler'] == 'nautilus':
+            run_sampler.run_nautilus()
         else:
-            
-            prior_obj.add_parameter('b1', dist=(0, 5.0))
-            prior_obj.add_parameter('b2', dist=(-5.0, 5.0))
-            prior_obj.add_parameter('a1', dist=(-50.0, 50.0))
-            prior_obj.add_parameter('a2', dist=(-50.0, 50.0))
-            prior_obj.add_parameter('ad', dist=(-50.0, 50.0))
-
-        n_live = 5000
-
-        output_path = '/disks/shear16/herle/models/'
-    
-        filename = output_path + f"nautilus_chain.h5"
-        
-        sampler = Sampler(
-            prior_obj,
-            loglikelihood_fn,
-            n_live=n_live,
-            pool= config_setup['n_cores'] if config_setup['n_cores'] > 1 else None,
-            filepath=filename,
-            resume=False,
-            n_networks=16,
-        )
-        sampler.run(verbose=True)
-        points, log_w, log_l = sampler.posterior()
-        weights = np.exp(log_w)
-        logz = sampler.log_z
-        output_file = (output_path +
-                    f"nautilus_chain.npz")
-
-        np.savez(output_file,
-                samples=points,
-                logl=log_l,
-                weights=weights,
-                logz=logz)
-        
-        print(f"Saved results to {output_file}")
-
-
-
-
-        
+            print('Choose between emcee or nautilus')
     else:
         print('Choose between evaluate, emcee or nautilus')
     
