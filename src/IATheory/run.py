@@ -41,8 +41,10 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     max_scale_cut = 100, 
                     z_type = 'spec', # It can either be "phot" or "spec"
                     Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
-                    bins_zm = 10, # Number of redshift bins for the error distribution in the phot case
-                    sampler = 'nautilus', # Allows to choose between evaluate and emcee (for the moment)
+                    bins_zm = 100, # Number of redshift bins for the error distribution in the phot case
+                    add_magnification = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
+                    add_galaxy_galaxy_lensing = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
+                    sampler = 'emcee', # Allows to choose between evaluate and emcee (for the moment)
                     box=False, #is it a box or a lightcone
                     n_cores = 10
                     )
@@ -176,9 +178,10 @@ def update_config(config_setup):
         # Matter x matter
         config_setup['pk_mm'] = pt.get_pt_pk2d(config_setup['cosmo'], config_setup['ptt_m'], tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gp'])
 
-        path_modeling_distributions = '/data/astro/scratch/dnavarro/PAUS_IA/paper/measurements/PAUS_data/modeling/'
-        magnification_alpha = pd.read_parquet(path_modeling_distributions + 'magnification_alpha.pq')
-        config_setup['alpha'] = magnification_alpha['bright_no_zb_cut_0_no_luminosity_cut_0_red_NUVr_BB_2_colors'].values
+        if config_setup['add_magnification']:
+            path_magnification = '/data/astro/scratch/dnavarro/PAUS_IA/paper/measurements/PAUS_data/modeling/'
+            magnification_alpha = pd.read_parquet(path_magnification + 'magnification_alpha.pq')
+            config_setup['alpha'] = magnification_alpha['bright_no_zb_cut_0_no_luminosity_cut_0_red_NUVr_BB_2_colors'].values
 
     return config_setup
 

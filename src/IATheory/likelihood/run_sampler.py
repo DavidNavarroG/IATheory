@@ -41,8 +41,6 @@ def log_prior(p):
 
 def log_likelihood(p):
 
-    rp_data, corr, cov_mat
-
     if config_setup['box'] == False:
 
         if config_setup['z_type'] == 'spec':
@@ -102,10 +100,10 @@ def run_emcee():
         aprox_bias = np.asarray([1.2, -0.4, 0.5, 1, 1.5])
 
     path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
-    filename = path_chains + "wgg_wgp_spec_{}_{}_Mpc_h_emcee.h5".format(config_setup['IA_model'], config_setup['min_scale_cut'])
+    filename = path_chains + "wgg_wgp_{}_{}_{}_Mpc_h_emcee.h5".format(config_setup['z_type'] ,config_setup['IA_model'], config_setup['min_scale_cut'])
     
-    n_walkers = 12 #32
-    n_steps = 100 #10000
+    n_walkers = 32
+    n_steps = 10000
     initial = aprox_bias + 0.1 * np.random.randn(n_walkers, n_dim)
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(n_walkers, n_dim)

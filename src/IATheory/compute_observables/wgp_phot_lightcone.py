@@ -33,24 +33,31 @@ def model_wgp_phot_lightcone(p, config_setup):
         ptt_i = pt.PTIntrinsicAlignmentTracer(c1=(config_setup['z_centers'],c_1), c2=(config_setup['z_centers'],c_2), cdelta=(config_setup['z_centers'],c_d)) # TATT model
     
     # Calculate some power spectra with FAST-PT
-    # Galaxies x matter
-    pk_gm = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gp'])
-    # Matter x intrinsic
-    pk_mi = pt.get_pt_pk2d(config_setup['cosmo'], config_setup['ptt_m'], tracer2=ptt_i, ptc=config_setup['ptc_gp'])
     # Galaxies x intrinsic.
     pk_gi = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=ptt_i, ptc=config_setup['ptc_gp'])
-
-    # Error distributions
-    pk_gm_z = np.zeros_like(config_setup['k'])
-    pk_mm_z = np.zeros_like(config_setup['k'])
-    pk_mi_z = np.zeros_like(config_setup['k'])
     pk_gi_z = np.zeros_like(config_setup['k'])
-    for i, z_i in enumerate(config_setup['z_centers']):
-        pk_gm_z[i, :] = pk_gm.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
-        pk_mm_z[i, :] = config_setup['pk_mm'].eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
-        pk_mi_z[i, :] = pk_mi.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
-        pk_gi_z[i, :] = pk_gi.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
 
+    if config_setup['add_galaxy_galaxy_lensing']:
+        # Galaxies x matter
+        pk_gm = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gp'])
+        pk_gm_z = np.zeros_like(config_setup['k'])
+
+    if config_setup['add_magnification']:
+        # Matter x intrinsic
+        pk_mi = pt.get_pt_pk2d(config_setup['cosmo'], config_setup['ptt_m'], tracer2=ptt_i, ptc=config_setup['ptc_gp'])
+        pk_mi_z = np.zeros_like(config_setup['k'])
+
+    if config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
+        pk_mm_z = np.zeros_like(config_setup['k'])
+        
+    for i, z_i in enumerate(config_setup['z_centers']):
+        pk_gi_z[i, :] = pk_gi.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+        if config_setup['add_galaxy_galaxy_lensing']:
+            pk_gm_z[i, :] = pk_gm.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+        if config_setup['add_magnification']:
+            pk_mi_z[i, :] = pk_mi.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+        if config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
+            pk_mm_z[i, :] = config_setup['pk_mm'].eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
 
     def chunk_cl_integrals_wgp(zm_chunk_size, l_chunk_size):
 
@@ -62,11 +69,25 @@ def model_wgp_phot_lightcone(p, config_setup):
         for zm_chunk in zm_chunks:
             for l_chunk in l_chunks:
                 cl_gi_integrand = np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gi_z[:, l_chunk])
-                cl_gG_integrand = np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gm_z[:, l_chunk])
-                cl_mi_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z2_lensing_z1_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mi_z[:, l_chunk])
-                cl_mG_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['lensing_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mm_z[:, l_chunk])
-    
-                cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_gG_integrand + cl_mi_integrand + cl_mG_integrand, config_setup['cmd'], axis = 0)
+                if config_setup['add_galaxy_galaxy_lensing']:
+                    cl_gG_integrand = np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gm_z[:, l_chunk])
+                if config_setup['add_magnification']:
+                    cl_mi_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z2_lensing_z1_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mi_z[:, l_chunk])
+                if config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
+                    cl_mG_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['lensing_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mm_z[:, l_chunk])
+
+                if not config_setup['add_galaxy_galaxy_lensing'] and not config_setup['add_magnification']:
+                    print('Not galaxy-galaxy lensing and not magnification')
+                    cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand, config_setup['cmd'], axis = 0)
+                if config_setup['add_galaxy_galaxy_lensing'] and not config_setup['add_magnification']:
+                    print('Yes galaxy-galaxy lensing and not magnification')
+                    cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_gG_integrand, config_setup['cmd'], axis = 0)
+                if not config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
+                    print('Not galaxy-galaxy lensing and yes magnification')
+                    cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_mi_integrand, config_setup['cmd'], axis = 0)
+                if config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
+                    print('Yes galaxy-galaxy lensing and yes magnification')
+                    cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_gG_integrand + cl_mi_integrand + cl_mG_integrand, config_setup['cmd'], axis = 0)
     
         return cl_wgp
 

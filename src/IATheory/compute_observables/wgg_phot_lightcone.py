@@ -16,17 +16,21 @@ def model_wgg_phot_lightcone(p, config_setup):
     # Calculate some power spectra with FAST-PT
     # Galaxies x galaxies.
     pk_gg = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, ptc=config_setup['ptc_gg'])
-    # Galaxies x matter
-    pk_gm = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gg'])
 
     # I evaluate the power spectrum
     pk_gg_z = np.zeros_like(config_setup['k'])
-    pk_gm_z = np.zeros_like(config_setup['k'])
-    pk_mm_z = np.zeros_like(config_setup['k'])
+
+    if config_setup['add_magnification']:
+        # Galaxies x matter
+        pk_gm = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gg'])
+        pk_gm_z = np.zeros_like(config_setup['k'])
+        pk_mm_z = np.zeros_like(config_setup['k'])
+        
     for i, z_i in enumerate(config_setup['z_centers']):
         pk_gg_z[i, :] = pk_gg.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
-        pk_gm_z[i, :] = pk_gm.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
-        pk_mm_z[i, :] = config_setup['pk_mm'].eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+        if config_setup['add_magnification']:
+            pk_gm_z[i, :] = pk_gm.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+            pk_mm_z[i, :] = config_setup['pk_mm'].eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
 
     def chunk_cl_integrals_wgg(zm_chunk_size, l_chunk_size):
 
@@ -38,14 +42,17 @@ def model_wgg_phot_lightcone(p, config_setup):
         for zm_chunk in zm_chunks:
             for l_chunk in l_chunks:
                 cl_gg_integrand = np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gg_z[:, l_chunk])
-                cl_mm_integrand = 4*(config_setup['alpha']-1)*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['lensing_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mm_z[:, l_chunk])
-                cl_gm_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gm_z[:, l_chunk])
-                cl_mg_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z2_lensing_z1_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gm_z[:, l_chunk])
-                cl_wgg[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gg_integrand+cl_mm_integrand+cl_gm_integrand+cl_mg_integrand, config_setup['cmd'], axis = 0)
+                if config_setup['add_magnification']:
+                    cl_mm_integrand = 4*(config_setup['alpha']-1)*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['lensing_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mm_z[:, l_chunk])
+                    cl_gm_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gm_z[:, l_chunk])
+                    cl_mg_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['error_dist_z2_lensing_z1_wgg'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_gm_z[:, l_chunk])
+                    cl_wgg[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gg_integrand+cl_mm_integrand+cl_gm_integrand+cl_mg_integrand, config_setup['cmd'], axis = 0)
+                else:
+                    cl_wgg[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gg_integrand, config_setup['cmd'], axis = 0)
     
         return cl_wgg
 
-    zm_chunk_size = 2
+    zm_chunk_size = 10
     l_chunk_size = 101
     cl_wgg = chunk_cl_integrals_wgg(zm_chunk_size, l_chunk_size)
     theta = np.einsum('i, j->ij', config_setup['rp_model'], 1/config_setup['y3fid'].comoving_distance(config_setup['zm_centers']).value)

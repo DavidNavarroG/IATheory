@@ -4,9 +4,15 @@ import pandas as pd
 def read_data_mice(config_setup):
     # I read the data vectors and the covariance matrix.
     path_catalogues = '/nfs/pic.es/user/d/dnavarro/IATheory/data/catalogues/'
-    wgg_measured = pd.read_csv(path_catalogues + 'wgg_MICE_zs.txt', sep = ' ')
-    wgp_measured = pd.read_csv(path_catalogues + 'wgp_MICE_zs.txt', sep = ' ')
-    cov_mat = pd.read_csv(path_catalogues + 'cov_std_MICE_zs.txt', sep = ' ', header = None)
+    if config_setup['z_type'] == 'spec':
+        z_string = 'zs'
+    elif config_setup['z_type'] == 'phot':
+        z_string = 'zb'
+    else:
+        print('Error: z_string must be zs or zb')
+    wgg_measured = pd.read_csv(path_catalogues + 'wgg_MICE_{}.txt'.format(z_string), sep = ' ')
+    wgp_measured = pd.read_csv(path_catalogues + 'wgp_MICE_{}.txt'.format(z_string), sep = ' ')
+    cov_mat = pd.read_csv(path_catalogues + 'cov_std_MICE_{}.txt'.format(z_string), sep = ' ', header = None)
     cov_mat.columns = np.concatenate([wgg_measured.r.values, wgg_measured.r.values])
     cov_mat.set_index(np.concatenate([wgg_measured.r.values, wgg_measured.r.values]), inplace = True)
     
