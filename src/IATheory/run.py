@@ -18,36 +18,32 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_snapshot=0, #redshift of the snapshot
                     num_k = 10001,
                     bins_z = 100, # Number of redsfhit bins
-                    rp_model_min = 0.145, # Minimum transverse distance to model in Mpc
-                    rp_model_max = 26.09, # Maximum transverse distance to model in Mpc
-                    bins_rp_model = 18, # Number of transverse distance bins
+                    rp_model_min = 7.391, # Minimum transverse distance to model in Mpc
+                    rp_model_max = 128.016, # Maximum transverse distance to model in Mpc
+                    bins_rp_model = 16, # Number of transverse distance bins
                     log10kmin = -5, # minimum k
                     log10kmax = 2, # maximum k
                     l_min = 0, # Minimum l
                     l_max = 10001, # Maximum l
                     steps_l = 10, # Steps in l
-                    H0 = 69.,
-                    Om_m = 0.25, # Omega matter
-                    Om_b = 0.044, # Omega baryons
-                    sigma8 = 0.8,
-                    n_s = 0.95,
-                    #H0 = 68.1,
-                    #Om_m = 0.306, # Omega matter
-                    #Om_b = 0.0486, # Omega baryons
-                    #sigma8 = 0.815,
-                    #n_s = 0.967,
-                    IA_model = 'NLA', # Model for IA
-                    min_scale_cut = 2, # Minimum scale cut to apply in the correlation function in Mpc/h
+                    H0 = 68.1,
+                    Om_m = 0.306, # Omega matter
+                    Om_b = 0.0486, # Omega baryons
+                    sigma8 = 0.807,
+                    n_s = 0.967,
+                    IA_model = 'TATT', # Model for IA
+                    min_scale_cut = 5, # Minimum scale cut to apply in the correlation function in Mpc/h
                     max_scale_cut = 100, 
                     z_type = 'spec', # It can either be "phot" or "spec"
                     Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
                     bins_zm = 100, # Number of redshift bins for the error distribution in the phot case
                     add_magnification = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
                     add_galaxy_galaxy_lensing = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
-                    sampler = 'emcee', # Allows to choose between evaluate and emcee (for the moment)
-                    box=False, #is it a box or a lightcone
-                    n_cores = 10
-                    )
+                    sampler = 'nautilus', # Allows to choose between evaluate and emcee (for the moment)
+                    box=True, #is it a box or a lightcone
+                    n_cores = 192
+)
+
 
 def update_config(config_setup):
     # This function computes some quantities that are needed for the modelling of the observables and only need to be defined once.
@@ -59,6 +55,7 @@ def update_config(config_setup):
     
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
+    #config_setup['rp_model'] = [7.39101205, 8.93870529, 10.8104887, 13.07422744, 15.81199776, 19.12306286, 23.12747186, 27.9704124, 33.82747472, 40.91101804, 49.47787, 59.83863852, 72.36897344, 87.52318646, 105.85072309, 128.0160838]
     config_setup['k_model'] = np.logspace(config_setup['log10kmin'], config_setup['log10kmax'], config_setup['num_k'])
     # I define the redshift, the l and the k.
     z = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_z'])
@@ -210,8 +207,9 @@ def run():
             corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
             corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
         
-        print(corr_model_wgg)
-        print(corr_model_wgp)
+        print('rp:', config_setup['rp_model'])
+        print('wgg:', corr_model_wgg)
+        print('wgp:', corr_model_wgp)
     elif config_setup['sampler'] != 'evaluate':
         read_config.init_config(config_setup) # This function is used to pass the config information to the run_sampler.py as a global variable
         run_sampler.init_config()

@@ -36,9 +36,8 @@ def model_wgp_spec_snapshot(p, config_setup):
     else:
         ptt_i = pt.PTIntrinsicAlignmentTracer(c1=c_1, c2=c_2, cdelta=c_d)
     
-    pk_gi = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=ptt_i, ptc=config_setup['ptc_gp'])
+    pk_gi = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=ptt_i, ptc=config_setup['ptc_gp'], nonlin_pk_type='nonlinear')
     
-
     pk_gi_z = pk_gi.eval(config_setup['k_model'],1./(1+z_i), config_setup['cosmo'])
     integrand = pk_gi_z*config_setup['k_model']*scipy.special.jv(2, np.array([config_setup['k_model']*rp_i for rp_i in config_setup['rp_model']]))/(2*np.pi)
     wgp_spec_snapshot = -np.trapz(integrand, config_setup['k_model'], axis = 1)

@@ -58,6 +58,9 @@ def log_likelihood(p):
     
     corr_model_wgg_interpol = np.interp(rp_data, config_setup['rp_model'], corr_model_wgg)
     corr_model_wgp_interpol = np.interp(rp_data, config_setup['rp_model'], corr_model_wgp)
+    # print(p)
+    # print(corr_model_wgg_interpol)
+    # print(corr_model_wgp_interpol)
 
     corr_model_interpol = np.concatenate([corr_model_wgg_interpol, corr_model_wgp_interpol])
 
@@ -99,11 +102,13 @@ def run_emcee():
         n_dim = 5
         aprox_bias = np.asarray([1.2, -0.4, 0.5, 1, 1.5])
 
+
     path_chains = '/nfs/pic.es/user/d/dnavarro/IATheory/data/chains/' # Save the chains
     filename = path_chains + "wgg_wgp_{}_{}_{}_Mpc_h_emcee.h5".format(config_setup['z_type'] ,config_setup['IA_model'], config_setup['min_scale_cut'])
     
     n_walkers = 32
     n_steps = 10000
+
     initial = aprox_bias + 0.1 * np.random.randn(n_walkers, n_dim)
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(n_walkers, n_dim)
@@ -167,9 +172,9 @@ def run_nautilus():
 
     n_live = 5000
 
-    output_path = '/disks/shear16/herle/models/'
+    output_path = '/disks/shear16/herle/models/IATheory/'
 
-    filename = output_path + f"nautilus_chain.h5"
+    filename = output_path + f"nautilus_chain_2.h5"
     
     sampler = Sampler(
         prior_obj,
@@ -184,8 +189,7 @@ def run_nautilus():
     points, log_w, log_l = sampler.posterior()
     weights = np.exp(log_w)
     logz = sampler.log_z
-    output_file = (output_path +
-                f"nautilus_chain.npz")
+    output_file = (output_path + f"nautilus_chain_2.npz")
 
     np.savez(output_file,
             samples=points,
