@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
-from read_data import read_data_mice, read_data_flamingo
+from IATheory.compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
+from IATheory.read_data import read_data_mice, read_data_flamingo
 
 from . import read_config
 

@@ -10,8 +10,8 @@ import scipy
 from scipy.interpolate import splev, splrep
 import pyccl.nl_pt as pt
 
-from compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
-from likelihood import read_config, run_sampler
+from IATheory.compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
+from IATheory.likelihood import read_config, run_sampler
 
 config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_max = 1.1, # Maximum redshift to model
@@ -39,7 +39,7 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     bins_zm = 100, # Number of redshift bins for the error distribution in the phot case
                     add_magnification = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
                     add_galaxy_galaxy_lensing = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
-                    sampler = 'nautilus', # Allows to choose between evaluate and emcee (for the moment)
+                    sampler = 'evaluate', # Allows to choose between evaluate and emcee (for the moment)
                     box=True, #is it a box or a lightcone
                     n_cores = 192
 )
@@ -184,7 +184,10 @@ def update_config(config_setup):
 
 config_setup = update_config(config_setup)
 
-def run():
+def run(config=None):
+
+    if config is None:
+        config = config_setup  # fallback to the global dict
 
     if config_setup['IA_model'] == 'NLA':
         n_dim = 3
@@ -202,7 +205,7 @@ def run():
                 corr_model_wgg = wgg_phot_lightcone.model_wgg_phot_lightcone(aprox_bias, config_setup)
                 corr_model_wgp = wgp_phot_lightcone.model_wgp_phot_lightcone(aprox_bias, config_setup)
             else:
-                print('ERROR: z_type must be spec or phot')
+                ValueError('z_type must be spec or phot')
         else:
             corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
             corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
@@ -210,6 +213,7 @@ def run():
         print('rp:', config_setup['rp_model'])
         print('wgg:', corr_model_wgg)
         print('wgp:', corr_model_wgp)
+
     elif config_setup['sampler'] != 'evaluate':
         read_config.init_config(config_setup) # This function is used to pass the config information to the run_sampler.py as a global variable
         run_sampler.init_config()
@@ -223,7 +227,7 @@ def run():
     else:
         print('Choose between evaluate, emcee or nautilus')
     
-    return None
+    return config_setup['rp_model'], corr_model_wgg, corr_model_wgp
 
 if __name__ == '__main__':
     
