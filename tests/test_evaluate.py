@@ -1,4 +1,18 @@
-# tests/test_evaluate.py
+"""
+Tests for the evaluation mode of IATheory.
+
+Run by using pytest -v -W ignore::DeprecationWarning in the root directory
+
+
+This module validates that `run_module.run()` produces:
+- Matched shapes between wgg and wgp
+- Numerical outputs identical to a known golden reference for rp, wgg, wgp
+
+The golden arrays correspond to a fixed cosmology and IA configuration
+used for regression testing. Any change to the physics, numerical integration,
+or model logic that affects these outputs will cause this test to fail.
+"""
+
 import pytest
 import numpy as np
 from IATheory import run as run_module
@@ -17,6 +31,21 @@ WGP_GOLDEN = np.array([0.30783555, 0.25137702, 0.20218899, 0.16004244, 0.1246772
                        0.01097544, 0.0078939,  0.00526108, 0.00299911])
 
 def test_golden_values(reset_config):
+    """
+
+    Verify that IATheory's evaluation mode matches the golden reference output.
+
+    This test:
+    - Sets up a known cosmology, IA model, and modeling scale configuration
+    - Runs `run_module.run()` in `evaluate` mode with `box=True`
+    - Ensures wgg and wgp have identical shapes
+    - Compares rp, wgg, and wgp against pre-computed golden values using `allclose`
+
+    The golden arrays encode the expected results for this fixed configuration.
+    Any deviation indicates a regression in physics modeling, numerical accuracy,
+    or configuration handling.
+
+    """
     cfg = reset_config
     cfg.update({
         'sampler': 'evaluate',
@@ -42,6 +71,8 @@ def test_golden_values(reset_config):
     run_module.config_setup = update_config(cfg)
 
     rp, wgg, wgp = run_module.run()
+
+    assert wgg.shape == wgp.shape, "wgg and wgp shapes do not match"
 
     # Compare arrays using allclose
     assert np.allclose(rp, RP_GOLDEN, rtol=1e-6), "rp does not match golden reference"

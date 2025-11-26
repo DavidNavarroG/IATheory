@@ -55,7 +55,6 @@ def update_config(config_setup):
     
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
-    #config_setup['rp_model'] = [7.39101205, 8.93870529, 10.8104887, 13.07422744, 15.81199776, 19.12306286, 23.12747186, 27.9704124, 33.82747472, 40.91101804, 49.47787, 59.83863852, 72.36897344, 87.52318646, 105.85072309, 128.0160838]
     config_setup['k_model'] = np.logspace(config_setup['log10kmin'], config_setup['log10kmax'], config_setup['num_k'])
     # I define the redshift, the l and the k.
     z = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_z'])
@@ -210,10 +209,6 @@ def run(config=None):
             corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
             corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
         
-        print('rp:', config_setup['rp_model'])
-        print('wgg:', corr_model_wgg)
-        print('wgp:', corr_model_wgp)
-
     elif config_setup['sampler'] != 'evaluate':
         read_config.init_config(config_setup) # This function is used to pass the config information to the run_sampler.py as a global variable
         run_sampler.init_config()
