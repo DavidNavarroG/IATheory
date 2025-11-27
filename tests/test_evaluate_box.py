@@ -50,6 +50,8 @@ def test_golden_values(reset_config):
     cfg.update({
         'sampler': 'evaluate',
         'box': True,
+        'z_snapshot': 0,
+        'num_k': 10001,
         'rp_model_min': 7.391,
         'rp_model_max': 128.016,
         'bins_rp_model': 16,
