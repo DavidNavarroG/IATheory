@@ -15,7 +15,7 @@ def model_wgg_spec_snapshot(p, config_setup):
 
     # Calculate some power spectra with FAST-PT
     # Galaxies x galaxies.
-    pk_gg = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, ptc=config_setup['ptc_gg'])
+    pk_gg = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, ptc=config_setup['ptc_gg'], nonlin_pk_type='nonlinear')
 
     z_i = config_setup['z_snapshot']
     pk_gg_z = pk_gg.eval(config_setup['k_model'],1./(1+z_i), config_setup['cosmo'])

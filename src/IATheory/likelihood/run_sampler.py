@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
-from read_data import read_data_mice, read_data_flamingo
+from IATheory.compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
+from IATheory.read_data import read_data_mice, read_data_flamingo
 
 from . import read_config
 
@@ -104,6 +104,7 @@ def run_emcee():
     
     n_walkers = 32
     n_steps = 10000
+
     initial = aprox_bias + 0.1 * np.random.randn(n_walkers, n_dim)
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(n_walkers, n_dim)
@@ -167,9 +168,9 @@ def run_nautilus():
 
     n_live = 5000
 
-    output_path = '/disks/shear16/herle/models/'
+    output_path = '/disks/shear16/herle/models/IATheory/'
 
-    filename = output_path + f"nautilus_chain.h5"
+    filename = output_path + f"nautilus_chain_2.h5"
     
     sampler = Sampler(
         prior_obj,
@@ -184,8 +185,7 @@ def run_nautilus():
     points, log_w, log_l = sampler.posterior()
     weights = np.exp(log_w)
     logz = sampler.log_z
-    output_file = (output_path +
-                f"nautilus_chain.npz")
+    output_file = (output_path + f"nautilus_chain_2.npz")
 
     np.savez(output_file,
             samples=points,

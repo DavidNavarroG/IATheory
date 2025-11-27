@@ -10,44 +10,40 @@ import scipy
 from scipy.interpolate import splev, splrep
 import pyccl.nl_pt as pt
 
-from compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
-from likelihood import read_config, run_sampler
+from IATheory.compute_observables import wgg_spec_lightcone, wgp_spec_lightcone, wgg_spec_snapshot, wgp_spec_snapshot, wgg_phot_lightcone, wgp_phot_lightcone
+from IATheory.likelihood import read_config, run_sampler
 
 config_setup = dict(z_min = 0., # Minimum redshift to model
                     z_max = 1.1, # Maximum redshift to model
                     z_snapshot=0, #redshift of the snapshot
                     num_k = 10001,
                     bins_z = 100, # Number of redsfhit bins
-                    rp_model_min = 0.145, # Minimum transverse distance to model in Mpc
-                    rp_model_max = 26.09, # Maximum transverse distance to model in Mpc
-                    bins_rp_model = 18, # Number of transverse distance bins
+                    rp_model_min = 7.391, # Minimum transverse distance to model in Mpc
+                    rp_model_max = 128.016, # Maximum transverse distance to model in Mpc
+                    bins_rp_model = 16, # Number of transverse distance bins
                     log10kmin = -5, # minimum k
                     log10kmax = 2, # maximum k
                     l_min = 0, # Minimum l
                     l_max = 10001, # Maximum l
                     steps_l = 10, # Steps in l
-                    H0 = 69.,
-                    Om_m = 0.25, # Omega matter
-                    Om_b = 0.044, # Omega baryons
-                    sigma8 = 0.8,
-                    n_s = 0.95,
-                    #H0 = 68.1,
-                    #Om_m = 0.306, # Omega matter
-                    #Om_b = 0.0486, # Omega baryons
-                    #sigma8 = 0.815,
-                    #n_s = 0.967,
-                    IA_model = 'NLA', # Model for IA
-                    min_scale_cut = 2, # Minimum scale cut to apply in the correlation function in Mpc/h
+                    H0 = 68.1,
+                    Om_m = 0.306, # Omega matter
+                    Om_b = 0.0486, # Omega baryons
+                    sigma8 = 0.807,
+                    n_s = 0.967,
+                    IA_model = 'TATT', # Model for IA
+                    min_scale_cut = 5, # Minimum scale cut to apply in the correlation function in Mpc/h
                     max_scale_cut = 100, 
                     z_type = 'spec', # It can either be "phot" or "spec"
                     Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
                     bins_zm = 100, # Number of redshift bins for the error distribution in the phot case
                     add_magnification = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
                     add_galaxy_galaxy_lensing = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
-                    sampler = 'emcee', # Allows to choose between evaluate and emcee (for the moment)
-                    box=False, #is it a box or a lightcone
-                    n_cores = 10
-                    )
+                    sampler = 'evaluate', # Allows to choose between evaluate and emcee (for the moment)
+                    box=True, #is it a box or a lightcone
+                    n_cores = 192
+)
+
 
 def update_config(config_setup):
     # This function computes some quantities that are needed for the modelling of the observables and only need to be defined once.
@@ -187,7 +183,10 @@ def update_config(config_setup):
 
 config_setup = update_config(config_setup)
 
-def run():
+def run(config=None):
+
+    if config is None:
+        config = config_setup  # fallback to the global dict
 
     if config_setup['IA_model'] == 'NLA':
         n_dim = 3
@@ -205,13 +204,11 @@ def run():
                 corr_model_wgg = wgg_phot_lightcone.model_wgg_phot_lightcone(aprox_bias, config_setup)
                 corr_model_wgp = wgp_phot_lightcone.model_wgp_phot_lightcone(aprox_bias, config_setup)
             else:
-                print('ERROR: z_type must be spec or phot')
+                ValueError('z_type must be spec or phot')
         else:
             corr_model_wgg = wgg_spec_snapshot.model_wgg_spec_snapshot(aprox_bias, config_setup)
             corr_model_wgp = wgp_spec_snapshot.model_wgp_spec_snapshot(aprox_bias, config_setup)
         
-        print(corr_model_wgg)
-        print(corr_model_wgp)
     elif config_setup['sampler'] != 'evaluate':
         read_config.init_config(config_setup) # This function is used to pass the config information to the run_sampler.py as a global variable
         run_sampler.init_config()
@@ -225,7 +222,7 @@ def run():
     else:
         print('Choose between evaluate, emcee or nautilus')
     
-    return None
+    return config_setup['rp_model'], corr_model_wgg, corr_model_wgp
 
 if __name__ == '__main__':
     
