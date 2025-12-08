@@ -64,7 +64,7 @@ def model_wgp_phot_lightcone(p, config_setup):
         zm_chunks = [range(i, min(i + zm_chunk_size, len(config_setup['zm_centers']))) for i in range(0, len(config_setup['zm_centers']), zm_chunk_size)]
         l_chunks = [range(i, min(i + l_chunk_size, len(config_setup['l']))) for i in range(0, len(config_setup['l']), l_chunk_size)]
     
-        cl_wgp = np.zeros((len(config_setup['Pi']), len(config_setup['zm_centers']), len(config_setup['l'])))
+        cl_wgp = np.zeros((len(config_setup['Pi_h']), len(config_setup['zm_centers']), len(config_setup['l'])))
     
         for zm_chunk in zm_chunks:
             for l_chunk in l_chunks:
@@ -77,16 +77,12 @@ def model_wgp_phot_lightcone(p, config_setup):
                     cl_mG_integrand = 2*(config_setup['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config_setup['lensing_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config_setup['cmd']**2)), pk_mm_z[:, l_chunk])
 
                 if not config_setup['add_galaxy_galaxy_lensing'] and not config_setup['add_magnification']:
-                    print('Not galaxy-galaxy lensing and not magnification')
                     cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand, config_setup['cmd'], axis = 0)
                 if config_setup['add_galaxy_galaxy_lensing'] and not config_setup['add_magnification']:
-                    print('Yes galaxy-galaxy lensing and not magnification')
                     cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_gG_integrand, config_setup['cmd'], axis = 0)
                 if not config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
-                    print('Not galaxy-galaxy lensing and yes magnification')
                     cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_mi_integrand, config_setup['cmd'], axis = 0)
                 if config_setup['add_galaxy_galaxy_lensing'] and config_setup['add_magnification']:
-                    print('Yes galaxy-galaxy lensing and yes magnification')
                     cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand + cl_gG_integrand + cl_mi_integrand + cl_mG_integrand, config_setup['cmd'], axis = 0)
     
         return cl_wgp
@@ -106,7 +102,7 @@ def model_wgp_phot_lightcone(p, config_setup):
     zm_integration_phot_wgp = np.trapz(np.einsum('i,jki->jki', config_setup['kernel_wgp'], corr_function_phot_wgp), config_setup['zm_centers'], axis = 2)
     
     #Integration over pi
-    wgp_phot = -np.trapz(zm_integration_phot_wgp, config_setup['Pi'], axis = 1)
+    wgp_phot = -np.trapz(zm_integration_phot_wgp, config_setup['Pi_h'], axis = 1)
     
     return wgp_phot.value
 

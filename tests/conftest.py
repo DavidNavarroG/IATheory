@@ -33,7 +33,7 @@ def reset_config():
         "min_scale_cut": 5,  # Minimum scale cut in Mpc/h
         "max_scale_cut": 100,
         "z_type": "spec",  # Either "phot" or "spec"
-        "Pi": np.array([-233, -144, -89, -55, -34, -21, -13, -8, -5, -3, -2, -1, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]) * u.Mpc / 0.69,
+        "Pi": np.array([-233, -144, -89, -55, -34, -21, -13, -8, -5, -3, -2, -1, 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]) * u.Mpc,
         "bins_zm": 100,  # Number of redshift bins for photometric errors
         "add_magnification": True,
         "add_galaxy_galaxy_lensing": True,

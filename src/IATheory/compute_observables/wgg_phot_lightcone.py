@@ -37,7 +37,7 @@ def model_wgg_phot_lightcone(p, config_setup):
         zm_chunks = [range(i, min(i + zm_chunk_size, len(config_setup['zm_centers']))) for i in range(0, len(config_setup['zm_centers']), zm_chunk_size)]
         l_chunks = [range(i, min(i + l_chunk_size, len(config_setup['l']))) for i in range(0, len(config_setup['l']), l_chunk_size)]
     
-        cl_wgg = np.zeros((len(config_setup['Pi']), len(config_setup['zm_centers']), len(config_setup['l'])))
+        cl_wgg = np.zeros((len(config_setup['Pi_h']), len(config_setup['zm_centers']), len(config_setup['l'])))
     
         for zm_chunk in zm_chunks:
             for l_chunk in l_chunks:
@@ -66,7 +66,7 @@ def model_wgg_phot_lightcone(p, config_setup):
     zm_integration_phot_wgg = np.trapz(np.einsum('i,jki->jki', config_setup['kernel_wgg'], corr_function_phot_wgg), config_setup['zm_centers'], axis = 2)
     
     #Integration over pi
-    wgg_phot = np.trapz(zm_integration_phot_wgg, config_setup['Pi'], axis = 1)
+    wgg_phot = np.trapz(zm_integration_phot_wgg, config_setup['Pi_h'], axis = 1)
     
     return wgg_phot.value
     

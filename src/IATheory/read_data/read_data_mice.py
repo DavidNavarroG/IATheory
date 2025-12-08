@@ -17,7 +17,7 @@ def read_data_mice(config_setup):
     cov_mat.set_index(np.concatenate([wgg_measured.r.values, wgg_measured.r.values]), inplace = True)
     
     # I apply the scale cuts
-    min_rp_scale = config_setup['min_scale_cut']/0.69
+    min_rp_scale = 100*(config_setup['min_scale_cut']/config_setup['H0'])
     wgg_measured = wgg_measured[wgg_measured.r > min_rp_scale]
     wgp_measured = wgp_measured[wgp_measured.r > min_rp_scale]
     cov_mat = cov_mat.loc[(cov_mat.columns>min_rp_scale), (cov_mat.columns>min_rp_scale)].values

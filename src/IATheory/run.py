@@ -35,7 +35,7 @@ config_setup = dict(z_min = 0., # Minimum redshift to model
                     min_scale_cut = 5, # Minimum scale cut to apply in the correlation function in Mpc/h
                     max_scale_cut = 100, 
                     z_type = 'spec', # It can either be "phot" or "spec"
-                    Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc/0.69, # Pi binning
+                    Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc, # Pi binning
                     bins_zm = 100, # Number of redshift bins for the error distribution in the phot case
                     add_magnification = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
                     add_galaxy_galaxy_lensing = True, # This boolean is used in the case of correlation functions with photometric redshifts to indicate whether to include magnification as a contaminant or not.
@@ -56,6 +56,8 @@ def update_config(config_setup):
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
     config_setup['k_model'] = np.logspace(config_setup['log10kmin'], config_setup['log10kmax'], config_setup['num_k'])
+    # I convert the Pi binning to Mpc/h
+    config_setup['Pi_h'] = 100*(config_setup['Pi']/config_setup['H0'])
     # I define the redshift, the l and the k.
     z = np.linspace(config_setup['z_min'], config_setup['z_max'], config_setup['bins_z'])
     config_setup['z_centers'] = (z[:-1]+z[1:])/2
@@ -156,15 +158,15 @@ def update_config(config_setup):
         
             return error_dist, error_dist_z1_lensing_z2, error_dist_z2_lensing_z1, lensing_z1_lensing_z2
 
-        config_setup['error_dist_wgg'] = np.zeros((len(config_setup['z_centers']), len(config_setup['Pi']), len(config_setup['zm_centers'])))
+        config_setup['error_dist_wgg'] = np.zeros((len(config_setup['z_centers']), len(config_setup['Pi_h']), len(config_setup['zm_centers'])))
         config_setup['error_dist_z1_lensing_z2_wgg'] = np.zeros_like(config_setup['error_dist_wgg'])
         config_setup['error_dist_z2_lensing_z1_wgg'] = np.zeros_like(config_setup['error_dist_wgg'])
         config_setup['lensing_z1_lensing_z2_wgg'] = np.zeros_like(config_setup['error_dist_wgg'])
-        config_setup['error_dist_wgp'] = np.zeros((len(config_setup['z_centers']), len(config_setup['Pi']), len(config_setup['zm_centers'])))
+        config_setup['error_dist_wgp'] = np.zeros((len(config_setup['z_centers']), len(config_setup['Pi_h']), len(config_setup['zm_centers'])))
         config_setup['error_dist_z1_lensing_z2_wgp'] = np.zeros_like(config_setup['error_dist_wgp'])
         config_setup['error_dist_z2_lensing_z1_wgp'] = np.zeros_like(config_setup['error_dist_wgp'])
         config_setup['lensing_z1_lensing_z2_wgp'] = np.zeros_like(config_setup['error_dist_wgp'])
-        for i, Pi_i in enumerate(config_setup['Pi']):
+        for i, Pi_i in enumerate(config_setup['Pi_h']):
             for j, zm_i in enumerate(config_setup['zm_centers']):
                 config_setup['error_dist_wgg'][:, i, j], config_setup['error_dist_z1_lensing_z2_wgg'][:, i, j], config_setup['error_dist_z2_lensing_z1_wgg'][:, i, j], config_setup['lensing_z1_lensing_z2_wgg'][:, i, j] = compute_error_dist(config_setup['cmd'], zm_i, Pi_i, error_dist_measured_wgg)
                 config_setup['error_dist_wgp'][:, i, j], config_setup['error_dist_z1_lensing_z2_wgp'][:, i, j], config_setup['error_dist_z2_lensing_z1_wgp'][:, i, j], config_setup['lensing_z1_lensing_z2_wgp'][:, i, j] = compute_error_dist(config_setup['cmd'], zm_i, Pi_i, error_dist_measured_wgp)
