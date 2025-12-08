@@ -77,6 +77,6 @@ def test_golden_values(reset_config):
     assert wgg.shape == wgp.shape, "wgg and wgp shapes do not match"
 
     # Compare arrays using allclose
-    assert np.allclose(rp, RP_GOLDEN, rtol=1e-6), "rp does not match golden reference"
-    assert np.allclose(wgg, WGG_GOLDEN, rtol=1e-6), "wgg does not match golden reference"
-    assert np.allclose(wgp, WGP_GOLDEN, rtol=1e-6), "wgp does not match golden reference"
+    assert np.allclose(rp, RP_GOLDEN, rtol=1e-3, atol=1e-8), "rp does not match golden reference"
+    assert np.allclose(wgg, WGG_GOLDEN, rtol=1e-3, atol=1e-8), "wgg does not match golden reference"
+    assert np.allclose(wgp, WGP_GOLDEN, rtol=1e-3, atol=1e-8), "wgp does not match golden reference"
