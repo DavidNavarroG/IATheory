@@ -4,3 +4,4 @@ __pycache__
 *.pyo
 .ipynb_checkpoints
 src/IATheory/*ipynb_checkpoints
+src/IATheory.egg-info/
