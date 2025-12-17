@@ -15,12 +15,12 @@ def model_wgg_spec_lightcone(p, config_setup):
 
     # Calculate some power spectra with FAST-PT
     # Galaxies x galaxies.
-    pk_gg = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, ptc=config_setup['ptc_gg'])
+    pk_gg = config_setup['ptc_gg'].get_biased_pk2d(ptt_g)
 
     pk_gg_z = np.zeros_like(config_setup['k'])
     corr_function_spec = np.zeros((len(config_setup['rp_model']), len(config_setup['z_centers'])))
     for i, z_i in enumerate(config_setup['z_centers']):
-        pk_gg_z[i, :] = pk_gg.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+        pk_gg_z[i, :] = pk_gg(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
         cl = pk_gg_z[i, :]/(config_setup['y3fid'].comoving_distance(z_i).value**2)
         theta = config_setup['rp_model'] / config_setup['y3fid'].comoving_distance(z_i).value
         #Hankel transform

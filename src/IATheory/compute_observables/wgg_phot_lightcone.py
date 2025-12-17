@@ -15,22 +15,22 @@ def model_wgg_phot_lightcone(p, config_setup):
     
     # Calculate some power spectra with FAST-PT
     # Galaxies x galaxies.
-    pk_gg = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, ptc=config_setup['ptc_gg'])
+    pk_gg = config_setup['ptc_gg'].get_biased_pk2d(ptt_g)
 
     # I evaluate the power spectrum
     pk_gg_z = np.zeros_like(config_setup['k'])
 
     if config_setup['add_magnification']:
         # Galaxies x matter
-        pk_gm = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gg'])
+        pk_gm = config_setup['ptc_gg'].get_biased_pk2d(ptt_g, tracer2=config_setup['ptt_m'])
         pk_gm_z = np.zeros_like(config_setup['k'])
         pk_mm_z = np.zeros_like(config_setup['k'])
         
     for i, z_i in enumerate(config_setup['z_centers']):
-        pk_gg_z[i, :] = pk_gg.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+        pk_gg_z[i, :] = pk_gg(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
         if config_setup['add_magnification']:
-            pk_gm_z[i, :] = pk_gm.eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
-            pk_mm_z[i, :] = config_setup['pk_mm'].eval(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+            pk_gm_z[i, :] = pk_gm(config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
+            pk_mm_z[i, :] = config_setup['pk_mm'](config_setup['k'][i],1./(1+z_i), config_setup['cosmo'])
 
     def chunk_cl_integrals_wgg(zm_chunk_size, l_chunk_size):
 

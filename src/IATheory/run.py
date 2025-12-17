@@ -51,7 +51,7 @@ def update_config(config_setup):
     # I set the cosmology in astropy and CCL objects
     config_setup['y3fid'] = FlatLambdaCDM(H0=config_setup['H0'], Om0=config_setup['Om_m'], Ob0=config_setup['Om_b']) # This is defined to compute comoving distances
     config_setup['cosmo'] = ccl.Cosmology(Omega_c=config_setup['Om_m']-config_setup['Om_b'], Omega_b=config_setup['Om_b'], 
-                          h=config_setup['H0']/100, sigma8 = config_setup['sigma8'], n_s=config_setup['n_s'])
+                          h=config_setup['H0']/100, sigma8 = config_setup['sigma8'], n_s=config_setup['n_s'], T_CMB=2.725, Neff=3.046)
     
     # I define the transverse distance
     config_setup['rp_model'] = np.logspace(np.log10(config_setup['rp_model_min']), np.log10(config_setup['rp_model_max']), config_setup['bins_rp_model'])
@@ -66,11 +66,14 @@ def update_config(config_setup):
     config_setup['k'] = np.array([(config_setup['l'] + 0.5) / j for j in config_setup['cmd']])
 
     # I initialize a PyCCL object needed to compute the observables.
-    config_setup['ptc_gg'] = pt.PTCalculator(with_NC=True, with_IA=False,
+    config_setup['ptc_gg'] = pt.ept.EulerianPTCalculator(with_NC=True, with_IA=False,
                           log10k_min=config_setup["log10kmin"], log10k_max=config_setup["log10kmax"], nk_per_decade=20)
     
-    config_setup['ptc_gp'] = pt.PTCalculator(with_NC=True, with_IA=True,
+    config_setup['ptc_gp'] = pt.ept.EulerianPTCalculator(with_NC=True, with_IA=True,
                           log10k_min=config_setup["log10kmin"], log10k_max=config_setup["log10kmax"], nk_per_decade=20)
+
+    config_setup['ptc_gg'].update_ingredients(config_setup['cosmo'])
+    config_setup['ptc_gp'].update_ingredients(config_setup['cosmo'])
 
     # I read the catalogues from positions and shapes to define the n(z) distribution in the lightcone.
     if config_setup['box'] == False:
@@ -171,7 +174,7 @@ def update_config(config_setup):
             # Matter
             config_setup['ptt_m'] = pt.PTMatterTracer()
             # Matter x matter
-            config_setup['pk_mm'] = pt.get_pt_pk2d(config_setup['cosmo'], config_setup['ptt_m'], tracer2=config_setup['ptt_m'], ptc=config_setup['ptc_gp'])
+            config_setup['pk_mm'] = config_setup['ptc_gp'].get_biased_pk2d(config_setup['ptt_m'], tracer2=config_setup['ptt_m'])
     
             if config_setup['add_magnification']:
                 path_magnification = '/data/astro/scratch/dnavarro/PAUS_IA/paper/measurements/PAUS_data/modeling/'

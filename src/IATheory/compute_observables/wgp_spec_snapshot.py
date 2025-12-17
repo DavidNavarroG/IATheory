@@ -24,7 +24,7 @@ def model_wgp_spec_snapshot(p, config_setup):
     z_i = config_setup['z_snapshot']
     # Let's convert the a_IA values into the correctly normalized c_IA values
 
-    c_1,c_d,c_2 = pt.translate_IA_norm(config_setup['cosmo'], z_i, a1=a_1, a1delta=a_d, a2=a_2, Om_m2_for_c2 = False)
+    c_1,c_d,c_2 = pt.translate_IA_norm(config_setup['cosmo'], z=z_i, a1=a_1, a1delta=a_d, a2=a_2, Om_m2_for_c2 = False)
 
     # Number counts (galaxy clustering)
     ptt_g = pt.PTNumberCountsTracer(b1=b_1, b2=b_2, bs=b_s, b3nl = b_3nl)
@@ -36,9 +36,9 @@ def model_wgp_spec_snapshot(p, config_setup):
     else:
         ptt_i = pt.PTIntrinsicAlignmentTracer(c1=c_1, c2=c_2, cdelta=c_d)
     
-    pk_gi = pt.get_pt_pk2d(config_setup['cosmo'], ptt_g, tracer2=ptt_i, ptc=config_setup['ptc_gp'], nonlin_pk_type='nonlinear')
+    pk_gi = config_setup['ptc_gp'].get_biased_pk2d(ptt_g, tracer2=ptt_i)
     
-    pk_gi_z = pk_gi.eval(config_setup['k_model'],1./(1+z_i), config_setup['cosmo'])
+    pk_gi_z = pk_gi(config_setup['k_model'],1./(1+z_i), config_setup['cosmo'])
     integrand = pk_gi_z*config_setup['k_model']*scipy.special.jv(2, np.array([config_setup['k_model']*rp_i for rp_i in config_setup['rp_model']]))/(2*np.pi)
     wgp_spec_snapshot = -np.trapz(integrand, config_setup['k_model'], axis = 1)
 
