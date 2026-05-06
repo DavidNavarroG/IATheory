@@ -177,7 +177,7 @@ def update_config(config_setup):
             config_setup['pk_mm'] = config_setup['ptc_gp'].get_biased_pk2d(config_setup['ptt_m'], tracer2=config_setup['ptt_m'])
     
             if config_setup['add_magnification']:
-                path_magnification = '/data/astro/scratch/dnavarro/PAUS_IA/paper/measurements/PAUS_data/modeling/'
+                path_magnification = '/data/paus/scratch/dnavarro/PAUS_IA/paper/measurements/PAUS_data/modeling/'
                 magnification_alpha = pd.read_parquet(path_magnification + 'magnification_alpha.pq')
                 config_setup['alpha'] = magnification_alpha['bright_no_zb_cut_0_no_luminosity_cut_0_red_NUVr_BB_2_colors'].values
 
