@@ -15,9 +15,8 @@ or model logic that affects these outputs will cause this test to fail.
 
 import pytest
 import numpy as np
-from astropy import units as u
-from IATheory import run as run_module
-from IATheory.run import update_config
+from IATheory.process_config import init_cosmology, init_grids, init_pt_calculators, compute_kernels_spec, init_lightcone, init_photometric, update_global_config, build_specific_config
+from IATheory.compute_observables import model_2p_corr
 
 # Golden reference arrays
 RP_GOLDEN = np.array([  7.391     ,   8.9386913 ,  10.81047248,  13.07420868,
@@ -51,11 +50,11 @@ def test_golden_values(reset_config):
     """
     cfg = reset_config
     cfg.update({
-        'sampler': 'evaluate',
-        'box': False,
-        'z_min': 0,
-        'z_max': 1.1,
-        'bins_z':100,
+        'H0': 68.1,
+        'Om_m': 0.306,
+        'Om_b': 0.0486,
+        'sigma8': 0.807,
+        'n_s': 0.967,
         'rp_model_min': 7.391,
         'rp_model_max': 128.016,
         'bins_rp_model': 16,
@@ -64,28 +63,29 @@ def test_golden_values(reset_config):
         'l_min': 0,
         'l_max': 10001,
         'steps_l': 10,
-        'H0': 68.1,
-        'Om_m': 0.306,
-        'Om_b': 0.0486,
-        'sigma8': 0.807,
-        'n_s': 0.967,
         'IA_model': 'TATT',
         'min_scale_cut': 5,
-        'max_scale_cut': 100,
-        'z_type': 'phot',
-        'Pi' : np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])* u.Mpc,
-        'bins_zm': 10,
-        'add_magnification' : True,
-        'add_galaxy_galaxy_lensing' : True
+        'max_scale_cut': 100
         })
-    
-    run_module.config_setup = update_config(cfg)
 
-    rp, wgg, wgp = run_module.run()
+    cfg = update_global_config(cfg)
 
-    assert wgg.shape == wgp.shape, "wgg and wgp shapes do not match"
+    galaxy_bias = [1.2, -0.4]
+    ia_params = [0.5, 1, 1.5]
+    model = model_2p_corr(cfg, galaxy_bias, ia_params)
+
+    case = 'lightcone_phot'
+    config_setup_lightcone_phot = dict(z_min = 0., z_max = 1.1, z_type = 'phot', 
+                                        Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233]),
+                                        bins_zm = 10, add_magnification = True, add_galaxy_galaxy_lensing = True)
+    config_lightcone_phot = build_specific_config(cfg, config_setup_lightcone_phot, case)
+
+    model.model_wgg_phot_lightcone(config_lightcone_phot)
+    model.model_wgp_phot_lightcone(config_lightcone_phot)
+
+    assert model.wgg_phot_lightcone.xi.shape == model.wgp_phot_lightcone.xi.shape, "wgg and wgp shapes do not match"
 
     # Compare arrays using allclose
-    assert np.allclose(rp, RP_GOLDEN, rtol=1e-3, atol=1e-8), "rp does not match golden reference"
-    assert np.allclose(wgg, WGG_GOLDEN, rtol=1e-3, atol=1e-8), "wgg does not match golden reference"
-    assert np.allclose(wgp, WGP_GOLDEN, rtol=1e-3, atol=1e-8), "wgp does not match golden reference"
+    assert np.allclose(cfg['rp_model'], RP_GOLDEN, rtol=1e-3, atol=1e-8), "rp does not match golden reference"
+    assert np.allclose(model.wgg_phot_lightcone.xi, WGG_GOLDEN, rtol=1e-3, atol=1e-8), "wgg does not match golden reference"
+    assert np.allclose(model.wgp_phot_lightcone.xi, WGP_GOLDEN, rtol=1e-3, atol=1e-8), "wgp does not match golden reference"
