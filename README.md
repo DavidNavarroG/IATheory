@@ -9,10 +9,10 @@ Examples to evaluate the models and to run likelihood analyses are provided in t
 ## Theory summary
 
 1. Box
-  $$ w_{\rm{gg}}(r_{\rm {p}}) = \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
-  $$ w_{\rm{gp}}(r_{\rm {p}}) = - \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
+  $$ w_{\rm{gg}}(r_{\rm{p}}) = \int \frac{{\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
+  $$ w_{\rm{gp}}(r_{\rm{p}}) = - \int \frac{{\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
 
-where $r_{\rm {p}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, and $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind.
+where $r_{\rm{p}}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, and $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind.
 2. Lightcone spectroscopic redsfhits
   $$ w_{\rm{gg}}(r_{\rm {p}}) = \int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
   $$ w_{\rm{gp}}(r_{\rm {p}}) = -\int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
