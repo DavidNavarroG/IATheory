@@ -37,21 +37,24 @@ where
 
 with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense sample, and 
 
- $$ \xi_{\rm{gg}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}) $$.
+ $$ \xi_{\rm{gg}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}). $$
 
 Similarly, for $w_{\rm{gp}}^{ij}$ we have
 
  $$ & C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi'\\ & \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+ 
 and
 
- $$ \xi_{\rm{gp}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2} $$.
+ $$ \xi_{\rm{gp}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}. $$
 
 Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such that the source-source correlation is:
 
  $$ C_{nn}^{ij}(l) =  C_{\rm{gg}}^{ij}(l) + C_{\rm{gm}}^{ij}(l) + C_{\rm{mg}}^{ij}(l) + C_{\rm{mm}}^{ij}(l) $$
+ 
 with $m$ denoting magnification and the source-shape correlation is:
 
  $$ C_{ne}^{ij}(l) =  C_{\mathrm{gI}}^{ij}(l) + C_{\mathrm{gG}}^{ij}(l) + C_{\mathrm{mI}}^{ij}(l) + C_{\mathrm{mG}}^{ij}(l) $$
+
 with $G$ denothing the shear.
 
 For a more complete explanation, see equations 28-45 of https://doi.org/10.1093/mnras/staf1630.
