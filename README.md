@@ -28,32 +28,36 @@ with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comov
 
 3. Lightcone photometric redsfhits:
 
-  $$ w_{\rm{gg}}^{ij} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}} {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}^{ij}(z_{\mathrm{m}})\xi_{\rm{gg}}^{ij}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
-  $$ w_{\rm{gp}}^{ij} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}}  {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}^{ij}(z_{\mathrm{m}})\xi_{\rm{gp}}^{ij}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
+  $$ w_{\rm{gg}} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}} {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}(z_{\mathrm{m}})\xi_{\rm{gg}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
+  $$ w_{\rm{gp}} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}}  {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}(z_{\mathrm{m}})\xi_{\rm{gp}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
 
 where
 
- $$ C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+ $$ \xi_{\rm{gg}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}(l\mid z_{1}, z_{2}) $$
 
-with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense sample, and 
-
- $$ \xi_{\rm{gg}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}). $$
-
-Similarly, for $w_{\rm{gp}}^{ij}$ we have
-
- $$ C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
- 
 and
 
- $$ \xi_{\rm{gp}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}. $$
+ $$ C_{\rm{gg}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+
+with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense sample. 
+
+
+Similarly, for $w_{\rm{gp}}$ we have
+
+ $$ \xi_{\rm{gp}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}(l\mid z_{1}, z_{2}. $$
+
+and
+
+ $$ C_{\rm{gI}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ). $$
+
 
 Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such that the source-source correlation is:
 
- $$ C_{nn}^{ij}(l) =  C_{\rm{gg}}^{ij}(l) + C_{\rm{gm}}^{ij}(l) + C_{\rm{mg}}^{ij}(l) + C_{\rm{mm}}^{ij}(l) $$
+ $$ C_{nn}(l) =  C_{\rm{gg}}(l) + C_{\rm{gm}}(l) + C_{\rm{mg}}(l) + C_{\rm{mm}}(l) $$
  
 with $m$ denoting magnification and the source-shape correlation is:
 
- $$ C_{ne}^{ij}(l) =  C_{\mathrm{gI}}^{ij}(l) + C_{\mathrm{gG}}^{ij}(l) + C_{\mathrm{mI}}^{ij}(l) + C_{\mathrm{mG}}^{ij}(l) $$
+ $$ C_{ne}(l) =  C_{\mathrm{gI}}(l) + C_{\mathrm{gG}}(l) + C_{\mathrm{mI}}(l) + C_{\mathrm{mG}}(l) $$
 
 with $G$ denothing the shear.
 
