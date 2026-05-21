@@ -4,7 +4,7 @@ Tests for the evaluation mode of IATheory.
 Run by using pytest -v -W ignore::DeprecationWarning in the root directory
 
 
-This module validates that `run_module.run()` produces:
+This module validates that:
 - Matched shapes between wgg and wgp
 - Numerical outputs identical to a known golden reference for rp, wgg, wgp
 
@@ -32,14 +32,13 @@ WGP_GOLDEN = np.array([0.17623536, 0.14541509, 0.11841426, 0.09505266, 0.0751753
                        0.01462287, 0.01088884, 0.00802522, 0.00587818, 0.00433258,
                        0.00289635])
 
-def test_golden_values(reset_config):
+def test_golden_values():
     """
 
     Verify that IATheory's evaluation mode matches the golden reference output.
 
     This test:
     - Sets up a known cosmology, IA model, and modeling scale configuration
-    - Runs `run_module.run()` in `evaluate` mode with `box=True`
     - Ensures wgg and wgp have identical shapes
     - Compares rp, wgg, and wgp against pre-computed golden values using `allclose`
 
@@ -48,13 +47,13 @@ def test_golden_values(reset_config):
     or configuration handling.
 
     """
-    cfg = reset_config
-    cfg.update({
+    cfg = ({
         'H0': 68.1,
         'Om_m': 0.306,
         'Om_b': 0.0486,
         'sigma8': 0.807,
         'n_s': 0.967,
+        'num_k': 10001,
         'rp_model_min': 7.391,
         'rp_model_max': 128.016,
         'bins_rp_model': 16,
@@ -63,9 +62,7 @@ def test_golden_values(reset_config):
         'l_min': 0,
         'l_max': 10001,
         'steps_l': 10,
-        'IA_model': 'TATT',
-        'min_scale_cut': 5,
-        'max_scale_cut': 100
+        'IA_model': 'TATT'
     })
 
     cfg = update_global_config(cfg)
