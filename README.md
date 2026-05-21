@@ -37,7 +37,7 @@ where
 
 with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense sample, and 
 
- $$ \xi_{\rm{gg}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2})$$.
+ $$ \xi_{\rm{gg}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}) $$.
 
 Similarly, for $w_{\rm{gp}}^{ij}$ we have
 
