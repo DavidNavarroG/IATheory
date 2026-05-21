@@ -2,10 +2,10 @@ import numpy as np
 import pyccl.nl_pt as pt
 import scipy
 
-class model_wgg_spec_snapshot():
+class model_wgg_spec_box():
 
     """
-        Models the projected galaxy-galaxy correlation with spectroscopic redshifts in the snapshot.
+        Models the projected galaxy-galaxy correlation with spectroscopic redshifts in a box.
         
         Arguments:
         -----------
@@ -17,7 +17,7 @@ class model_wgg_spec_snapshot():
     
     def __init__(self, config, pk_gg):
 
-        z_i = config['z_snapshot']
+        z_i = config['z_box']
         pk_gg_z = pk_gg(config['k_model'],1./(1+z_i), config['cosmo'])
         integrand = pk_gg_z*config['k_model']*scipy.special.j0(np.array([config['k_model']*rp_i for rp_i in config['rp_model']]))/(2*np.pi)
         self.xi = np.trapz(integrand, config['k_model'], axis = 1)
@@ -25,7 +25,7 @@ class model_wgg_spec_snapshot():
 class model_wgg_spec_lightcone():
 
     """
-    Models the projected galaxy-galaxy correlation with spectroscopic redshifts in the lightcone.
+    Models the projected galaxy-galaxy correlation with spectroscopic redshifts in a lightcone.
     
     Arguments:
     -----------
@@ -53,7 +53,7 @@ class model_wgg_spec_lightcone():
 class model_wgg_phot_lightcone():
 
     """
-    Models the projected galaxy-galaxy correlation with photometric redshifts in the lightcone.
+    Models the projected galaxy-galaxy correlation with photometric redshifts in a lightcone.
     
     Arguments:
     -----------
@@ -116,10 +116,10 @@ class model_wgg_phot_lightcone():
         #Integration over pi
         self.xi = np.trapz(zm_integration_phot_wgg, config['Pi_h'], axis = 1)
 
-class model_wgp_spec_snapshot():
+class model_wgp_spec_box():
 
     """
-        Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in the snapshot.
+        Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in a box.
         
         Arguments:
         -----------
@@ -131,7 +131,7 @@ class model_wgp_spec_snapshot():
     
     def __init__(self, config, ptt_g, a_1, a_2, a_d):
 
-        z_i = config['z_snapshot']
+        z_i = config['z_box']
         # Let's convert the a_IA values into the correctly normalized c_IA values
         c_1,c_d,c_2 = pt.translate_IA_norm(config['cosmo'], z=z_i, a1=a_1, a1delta=a_d, a2=a_2, Om_m2_for_c2 = False)
         
@@ -150,7 +150,7 @@ class model_wgp_spec_snapshot():
 class model_wgp_spec_lightcone():
 
     """
-    Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in the lightcone.
+    Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in a lightcone.
     
     Arguments:
     -----------
@@ -191,7 +191,7 @@ class model_wgp_spec_lightcone():
 class model_wgp_phot_lightcone():
 
     """
-    Models the projected galaxy-intrinsic correlation with photometric redshifts in the lightcone.
+    Models the projected galaxy-intrinsic correlation with photometric redshifts in a lightcone.
     
     Arguments:
     -----------
@@ -287,8 +287,8 @@ class model_wgp_phot_lightcone():
 class model_2p_corr():
     """
     This class computes projected galaxy-galaxy (wgg) and galaxy-shear (wg+) correlation functions.
-    It also allows to compute these observables in the lightcone and in the snapshot.
-    In the case of the snapshot, it can model spectroscopic and photometric redshifts cases.
+    It also allows to compute these observables in a lightcone and in a box.
+    In the case of a lightcone, it can model spectroscopic and photometric redshifts cases.
 
     Arguments:
     -----------
@@ -298,26 +298,26 @@ class model_2p_corr():
     Attributes:
     -----------
         config (dict): Configuration dictionary for the computation.
-        wgg_spec_snapshot (object, optional): Projected galaxy-galaxy (position-position) correlation function with spectroscopic redshifts in the snapshot.
-        wgg_spec_lightcone (object, optional): Projected galaxy-galaxy (position-position) correlation function with spectroscopic redshifts in the lightcone.
-        wgg_phot_lightcone (object, optional): Projected galaxy-galaxy (position-position) correlation function with photometric redshifts in the lightcone.
-        wgp_spec_snapshot (object, optional): Projected galaxy-intrinsic (position-shape) correlation function with spectroscopic redshifts in the snapshot.
+        wgg_spec_box (object, optional): Projected galaxy-galaxy (position-position) correlation function with spectroscopic redshifts in a box.
+        wgg_spec_lightcone (object, optional): Projected galaxy-galaxy (position-position) correlation function with spectroscopic redshifts in a lightcone.
+        wgg_phot_lightcone (object, optional): Projected galaxy-galaxy (position-position) correlation function with photometric redshifts in a lightcone.
+        wgp_spec_box (object, optional): Projected galaxy-intrinsic (position-shape) correlation function with spectroscopic redshifts in a box.
 
 
     Methods:
     -----------
-        model_wgg_spec_snapshot():
-            Models the projected galaxy-galaxy correlation with spectroscopic redshifts in the snapshot.
+        model_wgg_spec_box():
+            Models the projected galaxy-galaxy correlation with spectroscopic redshifts in a box.
         model_wgg_spec_lightcone():
-            Models the projected galaxy-galaxy correlation with spectroscopic redshifts in the lightcone.
+            Models the projected galaxy-galaxy correlation with spectroscopic redshifts in a lightcone.
         model_wgg_phot_lightcone():
-            Models the projected galaxy-galaxy correlation with photometric redshifts in the lightcone.
-        model_wgp_spec_snapshot():
-            Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in the snapshot.
+            Models the projected galaxy-galaxy correlation with photometric redshifts in a lightcone.
+        model_wgp_spec_box():
+            Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in a box.
         model_wgp_spec_lightcone():
-            Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in the lightcone.
+            Models the projected galaxy-intrinsic correlation with spectroscopic redshifts in a lightcone.
         model_wgp_phot_lightcone():
-            Models the projected galaxy-intrinsic correlation with photometric redshifts in the lightcone.
+            Models the projected galaxy-intrinsic correlation with photometric redshifts in a lightcone.
                     
     """
     def __init__(self,config, galaxy_bias, ia_params):
@@ -346,8 +346,8 @@ class model_2p_corr():
         # Galaxies x galaxies.
         self.pk_gg = config['ptc_gg'].get_biased_pk2d(self.ptt_g)
     
-    def model_wgg_spec_snapshot(self, config_specific):
-        self.wgg_spec_snapshot = model_wgg_spec_snapshot(config_specific, self.pk_gg)
+    def model_wgg_spec_box(self, config_specific):
+        self.wgg_spec_box = model_wgg_spec_box(config_specific, self.pk_gg)
     
     def model_wgg_spec_lightcone(self, config_specific):
         self.wgg_spec_lightcone = model_wgg_spec_lightcone(config_specific, self.pk_gg)
@@ -355,8 +355,8 @@ class model_2p_corr():
     def model_wgg_phot_lightcone(self, config_specific):
         self.wgg_phot_lightcone = model_wgg_phot_lightcone(config_specific, self.pk_gg, self.ptt_g)
     
-    def model_wgp_spec_snapshot(self, config_specific):
-        self.wgp_spec_snapshot = model_wgp_spec_snapshot(config_specific, self.ptt_g, self.a_1, self.a_2, self.a_d)
+    def model_wgp_spec_box(self, config_specific):
+        self.wgp_spec_box = model_wgp_spec_box(config_specific, self.ptt_g, self.a_1, self.a_2, self.a_d)
     
     def model_wgp_spec_lightcone(self, config_specific):
         self.wgp_spec_lightcone = model_wgp_spec_lightcone(config_specific, self.ptt_g, self.a_1, self.a_2, self.a_d)

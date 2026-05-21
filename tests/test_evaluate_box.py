@@ -75,14 +75,14 @@ def test_golden_values(reset_config):
     model = model_2p_corr(cfg, galaxy_bias, ia_params)
 
     case = 'box'
-    config_setup_box = dict(z_snapshot=0)
+    config_setup_box = dict(z_box=0)
     config_box = build_specific_config(cfg, config_setup_box, case)
-    model.model_wgg_spec_snapshot(config_box)
-    model.model_wgp_spec_snapshot(config_box)
+    model.model_wgg_spec_box(config_box)
+    model.model_wgp_spec_box(config_box)
 
-    assert model.wgg_spec_snapshot.xi.shape == model.wgp_spec_snapshot.xi.shape, "wgg and wgp shapes do not match"
+    assert model.wgg_spec_box.xi.shape == model.wgp_spec_box.xi.shape, "wgg and wgp shapes do not match"
 
     # Compare arrays using allclose
     assert np.allclose(cfg['rp_model'], RP_GOLDEN, rtol=1e-3, atol=1e-8), "rp does not match golden reference"
-    assert np.allclose(model.wgg_spec_snapshot.xi, WGG_GOLDEN, rtol=1e-3, atol=1e-8), "wgg does not match golden reference"
-    assert np.allclose(model.wgp_spec_snapshot.xi, WGP_GOLDEN, rtol=1e-3, atol=1e-8), "wgp does not match golden reference"
+    assert np.allclose(model.wgg_spec_box.xi, WGG_GOLDEN, rtol=1e-3, atol=1e-8), "wgg does not match golden reference"
+    assert np.allclose(model.wgp_spec_box.xi, WGP_GOLDEN, rtol=1e-3, atol=1e-8), "wgp does not match golden reference"
