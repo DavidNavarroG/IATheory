@@ -34,21 +34,14 @@ with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comov
 where
 
  $$ \xi_{\rm{gg}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}(l\mid z_{1}, z_{2}) $$
-
-and
-
- $$ C_{\rm{gg}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
-
-with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense sample. 
-
-
-Similarly, for $w_{\rm{gp}}$ we have
-
  $$ \xi_{\rm{gp}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}(l\mid z_{1}, z_{2}. $$
 
 and
 
- $$ C_{\rm{gI}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ). $$
+ $$ C_{\rm{gg}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+ $$ C_{\rm{gI}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+
+with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n/e}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense and shape samples, respectively. 
 
 
 Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such that the source-source correlation is:
