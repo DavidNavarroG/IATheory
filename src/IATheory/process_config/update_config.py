@@ -69,9 +69,8 @@ def init_lightcone(cfg):
     cfg['k'] = np.array([(cfg['l'] + 0.5) / d for d in cfg['cmd']])
 
     # Load n(z) catalogues once
-    path_nz = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/'
-    cfg['_positions_nz'] = pd.read_csv(path_nz + 'positions_nz.csv')
-    cfg['_shapes_nz'] = pd.read_csv(path_nz + 'shapes_nz.csv')
+    cfg['_positions_nz'] = pd.read_csv(cfg['path_nz_positions'])
+    cfg['_shapes_nz'] = pd.read_csv(cfg['path_nz_shapes'])
 
     if cfg['z_type'] == 'spec':
         compute_kernels_spec(cfg, z)
@@ -153,13 +152,6 @@ def init_photometric(cfg):
 
     # Error distributions (your existing loop logic)
     compute_error_distributions(cfg)
-
-    # Magnification
-    if cfg.get('add_magnification'):
-        path = '/data/paus/scratch/dnavarro/PAUS_IA/paper/measurements/PAUS_data/modeling/'
-        cfg['alpha'] = pd.read_parquet(path + 'magnification_alpha.pq')[
-            'bright_no_zb_cut_0_no_luminosity_cut_0_red_NUVr_BB_2_colors'
-        ].values
 
     # Matter tracers for lensing
     cfg['ptt_m'] = pt.PTMatterTracer()

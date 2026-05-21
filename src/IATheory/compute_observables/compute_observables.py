@@ -91,9 +91,9 @@ class model_wgg_phot_lightcone():
                 for l_chunk in l_chunks:
                     cl_gg_integrand = np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_gg_z[:, l_chunk])
                     if config['add_magnification']:
-                        cl_mm_integrand = 4*(config['alpha']-1)*(config['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['lensing_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_mm_z[:, l_chunk])
-                        cl_gm_integrand = 2*(config['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_gm_z[:, l_chunk])
-                        cl_mg_integrand = 2*(config['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z2_lensing_z1_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_gm_z[:, l_chunk])
+                        cl_mm_integrand = 4*(config['alpha_magnification']-1)*(config['alpha_magnification']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['lensing_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_mm_z[:, l_chunk])
+                        cl_gm_integrand = 2*(config['alpha_magnification']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z1_lensing_z2_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_gm_z[:, l_chunk])
+                        cl_mg_integrand = 2*(config['alpha_magnification']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z2_lensing_z1_wgg'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_gm_z[:, l_chunk])
                         cl_wgg[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gg_integrand+cl_mm_integrand+cl_gm_integrand+cl_mg_integrand, config['cmd'], axis = 0)
                     else:
                         cl_wgg[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gg_integrand, config['cmd'], axis = 0)
@@ -252,9 +252,9 @@ class model_wgp_phot_lightcone():
                     if config['add_galaxy_galaxy_lensing']:
                         cl_gG_integrand = np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_gm_z[:, l_chunk])
                     if config['add_magnification']:
-                        cl_mi_integrand = 2*(config['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z2_lensing_z1_wgp'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_mi_z[:, l_chunk])
+                        cl_mi_integrand = 2*(config['alpha_magnification']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['error_dist_z2_lensing_z1_wgp'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_mi_z[:, l_chunk])
                     if config['add_galaxy_galaxy_lensing'] and config['add_magnification']:
-                        cl_mG_integrand = 2*(config['alpha']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['lensing_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_mm_z[:, l_chunk])
+                        cl_mG_integrand = 2*(config['alpha_magnification']-1)*np.einsum('ijk,il->ijkl', np.einsum('ijk,i->ijk', config['lensing_z1_lensing_z2_wgp'][:, :, zm_chunk], 1/(config['cmd']**2)), pk_mm_z[:, l_chunk])
 
                     if not config['add_galaxy_galaxy_lensing'] and not config['add_magnification']:
                         cl_wgp[:, zm_chunk.start:zm_chunk.stop, l_chunk.start:l_chunk.stop] = np.trapz(cl_gi_integrand, config['cmd'], axis = 0)

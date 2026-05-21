@@ -72,7 +72,9 @@ def test_golden_values():
     model = model_2p_corr(cfg, galaxy_bias, ia_params)
 
     case = 'lightcone_spec'
-    config_setup_lightcone_spec = dict(z_min = 0., z_max = 1.1, z_type = 'spec')
+    config_setup_lightcone_spec = dict(z_min = 0., z_max = 1.1, z_type = 'spec', 
+                                       path_nz_positions = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/positions_nz.csv',
+                                       path_nz_shapes = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/shapes_nz.csv')
     config_lightcone_spec = build_specific_config(cfg, config_setup_lightcone_spec, case)
 
     model.model_wgg_spec_lightcone(config_lightcone_spec)
