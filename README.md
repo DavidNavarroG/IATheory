@@ -14,6 +14,7 @@ Examples to evaluate the models and to run likelihood analyses are provided in t
   $$ w_{\rm{gp}}(r_{\rm{p}}) = - \int \frac{{\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
 
 where $r_{\rm{p}}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, and $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind.
+
 2. Lightcone spectroscopic redsfhits:
 
   $$ w_{\rm{gg}}(r_{\rm {p}}) = \int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
@@ -32,7 +33,7 @@ with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comov
 
 where
 
- $$ C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi'\\ & \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+ $$ C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
 
 with $\chi _{\rm hor}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi (z_{1}))$ quantifies the error distribution of the dense sample, and 
 
