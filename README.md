@@ -44,15 +44,12 @@ and
 with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n/e}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense and shape samples, respectively. 
 
 
-Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such that the source-source correlation is:
+Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such that the source-source and source-shape correlations, respectively:
 
  $$ C_{nn}(l) =  C_{\rm{gg}}(l) + C_{\rm{gm}}(l) + C_{\rm{mg}}(l) + C_{\rm{mm}}(l) $$
- 
-with $m$ denoting magnification and the source-shape correlation is:
-
  $$ C_{ne}(l) =  C_{\mathrm{gI}}(l) + C_{\mathrm{gG}}(l) + C_{\mathrm{mI}}(l) + C_{\mathrm{mG}}(l) $$
 
-with $G$ denothing the shear.
+with $m$ and $G$ denoting magnification and shear, respectively.
 
 For a more complete explanation, see equations 28-45 of https://doi.org/10.1093/mnras/staf1630.
 
