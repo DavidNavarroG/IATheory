@@ -31,7 +31,7 @@ with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comov
   $$ w_{\rm{gg}} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}} {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}(z_{\mathrm{m}})\xi_{\rm{gg}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
   $$ w_{\rm{gp}} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}}  {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}(z_{\mathrm{m}})\xi_{\rm{gp}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
 
-where
+where $\Pi$ is the radial binning and
 
  $$ \xi_{\rm{gg}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) = \xi_{\rm{gg}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}(l\mid z_{1}, z_{2}) $$
  $$ \xi_{\rm{gp}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) = \xi_{\rm{gp}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}(l\mid z_{1}, z_{2}) $$
@@ -41,7 +41,7 @@ where we have used the change of coordinates $z_{\mathrm{m}} = (z_{1}+z_{2})/2$,
  $$ C_{\rm{gg}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}(\chi'\mid \chi (z_{1})) p_{n}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
  $$ C_{\rm{gI}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}(\chi'\mid \chi (z_{1})) p_{e}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
 
-where $\Pi$ is the radial binning, $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n/e}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense and shape samples, respectively. 
+where $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n/e}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense and shape samples, respectively. 
 
 
 Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such as the source-source and source-shape correlations, respectively:
