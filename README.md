@@ -41,7 +41,7 @@ with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n}(\chi'\mid \ch
 
 Similarly, for $w_{\rm{gp}}^{ij}$ we have
 
- $$ & C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi'\\ & \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+ $$ C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
  
 and
 
