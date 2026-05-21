@@ -15,7 +15,7 @@ Examples to evaluate the models and to run likelihood analyses are provided in t
 
 where $r_{\rm{p}}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind, $P_{\rm{gg}}$ is the galaxy clustering power spectrum and $P_{\rm{gI}}$ is the galaxy-intrinsic power spectrum.
 
-2. Lightcone spectroscopic redsfhits:
+2. Lightcone spectroscopic redshifts:
 
   $$ w_{\rm{gg}}(r_{\rm {p}}) = \int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
   $$ w_{\rm{gp}}(r_{\rm {p}}) = -\int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
@@ -26,17 +26,23 @@ where $\mathcal{W}$ is the projection kernel:
 
 with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comoving distance along the line of sight at redshift $z$.
 
-3. Lightcone photometric redsfhits:
+3. Lightcone photometric redshifts:
 
   $$ w_{\rm{gg}} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}} {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}(z_{\mathrm{m}})\xi_{\rm{gg}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
   $$ w_{\rm{gp}} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}}  {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}(z_{\mathrm{m}})\xi_{\rm{gp}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
 
 where $\Pi$ is the radial binning and
 
- $$ \xi_{\rm{gg}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) = \xi_{\rm{gg}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}(l\mid z_{1}, z_{2}) $$
- $$ \xi_{\rm{gp}}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) = \xi_{\rm{gp}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}(l\mid z_{1}, z_{2}) $$
+ $$ \xi_{\rm{gg}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}(l\mid z_{1}, z_{2}) $$
+ $$ \xi_{\rm{gp}}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}(l\mid z_{1}, z_{2}) $$
 
-where we have used the change of coordinates $z_{\mathrm{m}} = (z_{1}+z_{2})/2$, $r_{\rm{p}}= \theta \chi(z_{\mathrm{m}})$ and $\Pi = c(z_{2}-z_{1})/H(z_{\mathrm{m}})$ and
+where we use the change of coordinates:
+
+- $z_{\mathrm{m}} = (z_{1}+z_{2})/2$
+- $r_{\rm{p}}= \theta \chi(z_{\mathrm{m}})$ 
+- $\Pi = c(z_{2}-z_{1})/H(z_{\mathrm{m}})$
+
+and
 
  $$ C_{\rm{gg}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}(\chi'\mid \chi (z_{1})) p_{n}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
  $$ C_{\rm{gI}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}(\chi'\mid \chi (z_{1})) p_{e}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
