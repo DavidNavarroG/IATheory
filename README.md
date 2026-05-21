@@ -1,2 +1,73 @@
 # IATheory
-This repository allows the modelling of Intrinsic Alignments (IA) estimators using PyCCL.
+
+## Description
+
+IATheory is a Python package built on top of PyCCL that provides a unified framework to compute galaxy clustering and intrinsic alignment (IA) estimators in both box and lightcone configurations. In the case of the lightcone, one can use spectroscopic or photometric redshifts. Magnification and lensing contributions can be added to photometric analyses.
+
+Examples to evaluate the models and to run likelihood analyses are provided in the folder "examples".
+
+## Theory summary
+
+1. Box
+  $$ w_{\rm{gg}}(r_{\rm {p}}) = \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
+  $$ w_{\rm{gp}}(r_{\rm {p}}) = - \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
+
+where $r_{\rm {p}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, and $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind.
+2. Lightcone spectroscopic redsfhits
+  $$ w_{\rm{gg}}(r_{\rm {p}}) = \int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
+  $$ w_{\rm{gp}}(r_{\rm {p}}) = -\int {\rm d}z \mathcal{W}(z) \int \frac{ {\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
+
+where $\mathcal{W}$ is the projection kernel
+
+  $$ \mathcal{W}(z) = \frac{n^{i}(z)n^{j}(z)}{\chi^{2}(z)d\chi/dz} \left [ \int {\rm d} z \frac{n^{i}(z)n^{j}(z)}{\chi^{2}(z)d\chi/dz} \right ]^{-1} $$
+
+with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comoving distance along the \gls{los} at redshift $z$.
+
+3. Lightcone photometric redsfhits
+  $$ w_{\rm{gg}}^{ij} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}} {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}^{ij}(z_{\mathrm{m}})\xi_{\rm{gg}}^{ij}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
+  $$ w_{\rm{gp}}^{ij} (r_{\rm {p}})=\int_{-\Pi_{{\rm max}}}^{\Pi_{{\rm max}}}  {\rm d}\Pi \int {\rm d}z_{\mathrm{m}} \mathcal{W}^{ij}(z_{\mathrm{m}})\xi_{\rm{gp}}^{ij}(r_{\rm {p}}, \Pi, z_{\mathrm{m}}) $$
+
+where
+
+ $$ C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi'\\ & \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{n}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+
+with $\chi _{\rm hor}$ is the comoving horizon distance and $p_{n}(\chi'\mid \chi (z_{1}))$ quantifies the error distribution of the dense sample, and 
+
+ $$ \xi_{\rm{gg}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{0}(l\theta)C_{\rm{gg}}^{ij}(l\mid z_{1}, z_{2})$$.
+
+Similarly, for $w_{\rm{gp}}^{ij}$ we have
+ $$ & C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi'\\ & \frac{p_{n}^{i}(\chi'\mid \chi (z_{1})) p_{e}^{j}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
+and
+ $$ \xi_{\rm{gp}}^{ij}(\theta \mid z_{1}, z_{2}) = \frac{1}{2\pi} \int_{0}^{\infty} {\rm d}l l J_{2}(l\theta)C_{\rm{gI}}^{ij}(l\mid z_{1}, z_{2} $$.
+
+Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such that the source-source correlation is:
+ $$ C_{nn}^{ij}(l) =  C_{\rm{gg}}^{ij}(l) + C_{\rm{gm}}^{ij}(l) + C_{\rm{mg}}^{ij}(l) + C_{\rm{mm}}^{ij}(l) $$
+with $m$ denoting magnification and the source-shape correlation is:
+ $$ C_{ne}^{ij}(l) =  C_{\mathrm{gI}}^{ij}(l) + C_{\mathrm{gG}}^{ij}(l) + C_{\mathrm{mI}}^{ij}(l) + C_{\mathrm{mG}}^{ij}(l) $$
+with $G$ denothing the shear.
+
+For a more complete explanation, see equations 28-45 of https://doi.org/10.1093/mnras/staf1630.
+
+## Installation
+
+This repository has some prerequisites, which you can find on the requirements.txt file (the python version for these libraries is 3.10.6). We recommend installing it inside a virtual environment:
+```bash
+python -m venv IA_Theory
+source IA_Theory/bin/activate
+pip install -r requirements.txt
+```
+
+Then, you can directly install **IATheory** from GitHub:
+```bash
+git clone git@github.com:DavidNavarroG/IATheory.git
+cd IATheory
+pip install -e .
+```
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details
+
+## Citations
+
+If you use this repository, we kindly ask you to cite https://doi.org/10.1093/mnras/staf1630 and https://arxiv.org/abs/2601.15851.
