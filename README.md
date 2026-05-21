@@ -13,7 +13,7 @@ Examples to evaluate the models and to run likelihood analyses are provided in t
   $$ w_{\rm{gg}}(r_{\rm{p}}) = \int \frac{{\rm d} k_{\perp} k_{\perp}}{2\pi}J_{0}(k_{\perp} r_{\rm {p}})P_{\rm{gg}}(k_{\perp}, z) $$
   $$ w_{\rm{gp}}(r_{\rm{p}}) = - \int \frac{{\rm d} k_{\perp} k_{\perp}}{2\pi}J_{2}(k_{\perp} r_{\rm {p}})P_{\rm{gI}}(k_{\perp}, z) $$
 
-where $r_{\rm{p}}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, and $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind.
+where $r_{\rm{p}}$ is the projected distance, $k_{\perp}$ the perpendicular wavelength, $J_{0}$ and $J_{2}$ are the 0th and 2nd-order Bessel functions of the first kind, $P_{\rm{gg}}$ is the galaxy clustering power spectrum and $P_{\rm{gI}}$ is the galaxy-intrinsic power spectrum.
 
 2. Lightcone spectroscopic redsfhits:
 
@@ -24,7 +24,7 @@ where $\mathcal{W}$ is the projection kernel:
 
   $$ \mathcal{W}(z) = \frac{n^{i}(z)n^{j}(z)}{\chi^{2}(z)d\chi/dz} \left [ \int {\rm d} z \frac{n^{i}(z)n^{j}(z)}{\chi^{2}(z)d\chi/dz} \right ]^{-1} $$
 
-with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comoving distance along the \gls{los} at redshift $z$.
+with $n^{i}$ the redshift distribution of the $i$ sample and $\chi(z)$ the comoving distance along the line of sight at redshift $z$.
 
 3. Lightcone photometric redsfhits:
 
@@ -41,7 +41,7 @@ and
  $$ C_{\rm{gg}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi_{\rm hor}} {\rm d}\chi' \frac{p_{n}(\chi'\mid \chi (z_{1})) p_{n}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gg}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
  $$ C_{\rm{gI}}(l\mid z_{1}, z_{2}) = \int_{0}^{\chi _{\rm hor}} {\rm d}\chi' \frac{p_{n}(\chi'\mid \chi (z_{1})) p_{e}(\chi'\mid \chi (z_{2}))}{\chi'^{2}}  P_{\rm{gI}}\left (k = \frac{l+0.5}{\chi'}, z(\chi')\right ) $$
 
-with $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n/e}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense and shape samples, respectively. 
+with $\Pi$ the radial binning, $\chi_{\rm{hor}}$ is the comoving horizon distance and $p_{n/e}(\chi'\mid \chi(z_{1}))$ quantifies the error distribution of the dense and shape samples, respectively. 
 
 
 Besides the purely galaxy-galaxy and galaxy-intrinsic contributions, the code allows to add the magnification and the lensing contributions to the photometric redshift case, such as the source-source and source-shape correlations, respectively:
