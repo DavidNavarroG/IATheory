@@ -75,7 +75,7 @@ def test_golden_values():
     config_setup_lightcone_phot = dict(z_min = 0., z_max = 1.1, z_type = 'phot',
                                        path_nz_positions = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/positions_nz.csv',
                                        path_nz_shapes = '/nfs/pic.es/user/d/dnavarro/IATheory/data/nz/shapes_nz.csv',
-                                       Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233]),
+                                       Pi = np.array([-233,-144,-89,-55,-34,-21,-13,-8,-5,-3,-2,-1,0,1,2,3,5,8,13,21,34,55,89,144,233])/(cfg['H0']/100),
                                        bins_zm = 10, add_magnification = True, alpha_magnification = 0.93, add_galaxy_galaxy_lensing = True)
     config_lightcone_phot = build_specific_config(cfg, config_setup_lightcone_phot, case)
 

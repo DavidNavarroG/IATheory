@@ -85,7 +85,7 @@ class model_wgg_phot_lightcone():
             zm_chunks = [range(i, min(i + zm_chunk_size, len(config['zm_centers']))) for i in range(0, len(config['zm_centers']), zm_chunk_size)]
             l_chunks = [range(i, min(i + l_chunk_size, len(config['l']))) for i in range(0, len(config['l']), l_chunk_size)]
         
-            cl_wgg = np.zeros((len(config['Pi_h']), len(config['zm_centers']), len(config['l'])))
+            cl_wgg = np.zeros((len(config['Pi']), len(config['zm_centers']), len(config['l'])))
         
             for zm_chunk in zm_chunks:
                 for l_chunk in l_chunks:
@@ -114,7 +114,7 @@ class model_wgg_phot_lightcone():
         zm_integration_phot_wgg = np.trapz(np.einsum('i,jki->jki', config['kernel_wgg'], corr_function_phot_wgg), config['zm_centers'], axis = 2)
         
         #Integration over pi
-        self.xi = np.trapz(zm_integration_phot_wgg, config['Pi_h'], axis = 1)
+        self.xi = np.trapz(zm_integration_phot_wgg, config['Pi'], axis = 1)
 
 class model_wgp_spec_box():
 
@@ -244,7 +244,7 @@ class model_wgp_phot_lightcone():
             zm_chunks = [range(i, min(i + zm_chunk_size, len(config['zm_centers']))) for i in range(0, len(config['zm_centers']), zm_chunk_size)]
             l_chunks = [range(i, min(i + l_chunk_size, len(config['l']))) for i in range(0, len(config['l']), l_chunk_size)]
         
-            cl_wgp = np.zeros((len(config['Pi_h']), len(config['zm_centers']), len(config['l'])))
+            cl_wgp = np.zeros((len(config['Pi']), len(config['zm_centers']), len(config['l'])))
         
             for zm_chunk in zm_chunks:
                 for l_chunk in l_chunks:
@@ -282,7 +282,7 @@ class model_wgp_phot_lightcone():
         zm_integration_phot_wgp = np.trapz(np.einsum('i,jki->jki', config['kernel_wgp'], corr_function_phot_wgp), config['zm_centers'], axis = 2)
         
         #Integration over pi
-        self.xi = -np.trapz(zm_integration_phot_wgp, config['Pi_h'], axis = 1)
+        self.xi = -np.trapz(zm_integration_phot_wgp, config['Pi'], axis = 1)
 
 class model_2p_corr():
     """

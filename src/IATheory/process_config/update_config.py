@@ -127,22 +127,21 @@ def compute_error_distributions(cfg):
     
         return error_dist, error_dist_z1_lensing_z2, error_dist_z2_lensing_z1, lensing_z1_lensing_z2
 
-    cfg['error_dist_wgg'] = np.zeros((len(cfg['z_centers']), len(cfg['Pi_h']), len(cfg['zm_centers'])))
+    cfg['error_dist_wgg'] = np.zeros((len(cfg['z_centers']), len(cfg['Pi']), len(cfg['zm_centers'])))
     cfg['error_dist_z1_lensing_z2_wgg'] = np.zeros_like(cfg['error_dist_wgg'])
     cfg['error_dist_z2_lensing_z1_wgg'] = np.zeros_like(cfg['error_dist_wgg'])
     cfg['lensing_z1_lensing_z2_wgg'] = np.zeros_like(cfg['error_dist_wgg'])
-    cfg['error_dist_wgp'] = np.zeros((len(cfg['z_centers']), len(cfg['Pi_h']), len(cfg['zm_centers'])))
+    cfg['error_dist_wgp'] = np.zeros((len(cfg['z_centers']), len(cfg['Pi']), len(cfg['zm_centers'])))
     cfg['error_dist_z1_lensing_z2_wgp'] = np.zeros_like(cfg['error_dist_wgp'])
     cfg['error_dist_z2_lensing_z1_wgp'] = np.zeros_like(cfg['error_dist_wgp'])
     cfg['lensing_z1_lensing_z2_wgp'] = np.zeros_like(cfg['error_dist_wgp'])
-    for i, Pi_i in enumerate(cfg['Pi_h']):
+    for i, Pi_i in enumerate(cfg['Pi']):
         for j, zm_i in enumerate(cfg['zm_centers']):
             cfg['error_dist_wgg'][:, i, j], cfg['error_dist_z1_lensing_z2_wgg'][:, i, j], cfg['error_dist_z2_lensing_z1_wgg'][:, i, j], cfg['lensing_z1_lensing_z2_wgg'][:, i, j] = compute_error_dist(cfg['cmd'], zm_i, Pi_i, error_dist_measured_wgg)
             cfg['error_dist_wgp'][:, i, j], cfg['error_dist_z1_lensing_z2_wgp'][:, i, j], cfg['error_dist_z2_lensing_z1_wgp'][:, i, j], cfg['lensing_z1_lensing_z2_wgp'][:, i, j] = compute_error_dist(cfg['cmd'], zm_i, Pi_i, error_dist_measured_wgp)
 
 def init_photometric(cfg):
     """Everything specific to photometric redshifts."""
-    cfg['Pi_h'] = 100 * (cfg['Pi'] / cfg['H0'])
     zm = np.linspace(cfg['z_min'], cfg['z_max'], cfg['bins_zm'])
     cfg['zm_centers'] = (zm[:-1] + zm[1:]) / 2
     cfg['cmd_zm'] = cfg['y3fid'].comoving_distance(cfg['zm_centers']).value
