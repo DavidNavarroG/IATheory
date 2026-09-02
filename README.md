@@ -62,18 +62,58 @@ For a more complete explanation, see equations 28-45 of https://doi.org/10.1093/
 ## Installation
 
 This repository has some prerequisites, which you can find on the requirements.txt file (the python version for these libraries is 3.10.6). We recommend installing it inside a virtual environment:
+
+### Option 1 - Conda (recommended for the examples)
+
+The example notebooks need additional packages (`matplotlib`, `jupyter`, ...) that are easiest to install with conda-forge:
+
+```bash
+conda create -n IAtheory -y python=3.10
+conda activate IAtheory
+
+pip install -e .            # core package (editable install)
+```
+
+To also run the sampling/likelihood example:
+```bash
+pip install emcee nautilus-sampler
+```
+
+### Option 2 - pip in a virtual environment
+
 ```bash
 python -m venv IA_Theory
 source IA_Theory/bin/activate
-pip install -r requirements.txt
+pip install -e .            # core package + runtime deps
 ```
 
-Then, you can directly install **IATheory** from GitHub:
+Install the optional extras only if you want to run the examples:
+
 ```bash
-git clone git@github.com:DavidNavarroG/IATheory.git
-cd IATheory
-pip install -e .
+pip install -e ".[examples]"     # model-evaluation notebook deps
+pip install -e ".[likelihood]"   # emcee + nautilus sampler
 ```
+
+## Running the examples
+
+The notebook kernel is named `iatheory`:
+
+```bash
+conda activate IAtheory
+python -m ipykernel install --user --name iatheory
+jupyter notebook examples/run_example_model_evaluation.ipynb
+```
+
+The box-case portion of `run_example_model_evaluation.ipynb` runs without any external data. The lightcone-spec, lightcone-phot (and likelihood) sections read catalogues and redshift distributions from hardcoded paths (e.g. `/nfs/...` and `/disks/...`) that are not included in this repository. To run those sections, point `path_nz_positions`, `path_nz_shapes`, and the catalogue paths in the notebooks/tests at your own data files.
+
+## Tests
+
+```bash
+pip install -e ".[dev]"
+pytest tests/
+```
+
+`tests/test_evaluate_box.py` runs standalone. The lightcone tests (`test_evaluate_lightcone_spec.py`, `test_evaluate_lightcone_phot.py`) additionally require the redshift-distribution CSV files referenced by the hardcoded NFS paths.
 
 ## License
 
