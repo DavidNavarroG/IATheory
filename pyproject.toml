@@ -19,6 +19,7 @@ dependencies = [
   "pandas",
   "pyccl>=3.0",
   "fast-pt>=3.0",
+  "pytest",
 ]
 
 [project.optional-dependencies]
